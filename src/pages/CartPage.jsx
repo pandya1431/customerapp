@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { Package, Zap, Store, Globe, Eye, Calendar, MapPin } from 'lucide-react';
 import { ordersApi } from '../services/api';
 import LoadingSpinner from '../components/common/LoadingSpinner';
-import MobileHeader from '../components/common/MobileHeader';
 import { useAuth } from '../hooks/useAuth';
 import { formatCurrency, formatDate } from '../utils/helpers';
 import toast from 'react-hot-toast';
@@ -147,9 +146,17 @@ const OrdersPage = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <MobileHeader title="My Orders" />
-      
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Mobile Back Arrow - Only visible on mobile */}
+        <div className="md:hidden mb-6 flex items-center space-x-3">
+          <button
+            onClick={() => window.history.back()}
+            className="text-gray-800 hover:text-emerald-600 transition-colors p-2 touch-manipulation text-2xl"
+            aria-label="Go back"
+          >
+            ←
+          </button>
+        </div>
         {/* Header */}
         <div className="mb-8 hidden md:block">
           <h1 className="text-2xl md:text-3xl font-bold text-gray-900">My Orders</h1>
