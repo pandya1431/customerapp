@@ -145,6 +145,7 @@ const OrdersPage = () => {
   }
 
   return (
+                className={`flex-1 min-w-0 px-4 py-4 text-sm font-medium transition-all duration-200 ${
     <div className="min-h-screen bg-gray-50">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Mobile Back Arrow - Only visible on mobile */}
@@ -155,24 +156,12 @@ const OrdersPage = () => {
             aria-label="Go back"
           >
             ←
-                className={`flex-1 min-w-0 px-4 py-4 text-sm font-medium transition-all duration-200 ${
-                  activeTab === tab.id
-                    ? 'bg-emerald-600 text-white'
-                    : 'text-gray-600 hover:text-emerald-600 hover:bg-emerald-50'
-                }`}
-              >
-                <span className="block">{tab.label}</span>
-                {tab.count > 0 && (
-                  <span className={`text-xs mt-1 block ${
-                    activeTab === tab.id ? 'text-emerald-100' : 'text-gray-400'
-                  }`}>
                     {tab.count} order{tab.count !== 1 ? 's' : ''}
                   </span>
                 )}
               </button>
             ))}
           </div>
-        </div>
 
         {/* Orders List */}
         <div className="space-y-4">

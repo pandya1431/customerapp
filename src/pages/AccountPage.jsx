@@ -174,7 +174,6 @@ const OrdersPage = () => {
               </button>
             ))}
           </div>
-        </div>
 
         {/* Orders List */}
         <div className="space-y-4">
