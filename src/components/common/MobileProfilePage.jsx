@@ -14,14 +14,56 @@ import {
   MessageCircle,
   ChevronRight
 } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
+import toast from 'react-hot-toast';
 
 const MobileProfilePage = () => {
   const { user, logout, isAuthenticated } = useAuth();
+  const navigate = useNavigate();
 
   const handleLogout = () => {
     logout();
+    toast.success('Logged out successfully');
+    navigate('/');
+  };
+
+  const handleTrackOrder = () => {
+    toast.success('Redirecting to order tracking...');
+    navigate('/orders');
+  };
+
+  const handleQuickAction = (action) => {
+    switch (action) {
+      case 'Reorder':
+        toast.success('Finding your previous orders...');
+        navigate('/orders');
+        break;
+      case 'Update Info':
+        toast.success('Opening profile editor...');
+        navigate('/profile');
+        break;
+      case 'Help Chat':
+        toast.success('Starting help chat...');
+        break;
+      case 'My Orders':
+        navigate('/orders');
+        break;
+      case 'My Addresses':
+        navigate('/addresses');
+        break;
+      case 'Notifications & Alerts':
+        toast.success('Opening notifications settings...');
+        break;
+      case 'Account Settings':
+        toast.success('Opening account settings...');
+        break;
+      case 'Help & Support':
+        toast.success('Opening help center...');
+        break;
+      default:
+        toast.success(`${action} clicked`);
+    }
   };
 
   if (!isAuthenticated) {
@@ -79,9 +121,9 @@ const MobileProfilePage = () => {
       {/* Navigation Menu */}
       <div className="bg-white mt-4 mx-4 rounded-lg shadow-sm">
         <div className="py-2">
-          <Link
-            to="/orders"
-            className="flex items-center justify-between px-4 py-4 hover:bg-gray-50 transition-colors"
+          <button
+            onClick={() => handleQuickAction('My Orders')}
+            className="flex items-center justify-between w-full px-4 py-4 hover:bg-gray-50 transition-colors"
           >
             <div className="flex items-center space-x-3">
               <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
@@ -90,11 +132,11 @@ const MobileProfilePage = () => {
               <span className="font-medium text-gray-900">My Orders</span>
             </div>
             <ChevronRight className="w-5 h-5 text-gray-400" />
-          </Link>
+          </button>
 
-          <Link
-            to="/addresses"
-            className="flex items-center justify-between px-4 py-4 hover:bg-gray-50 transition-colors"
+          <button
+            onClick={() => handleQuickAction('My Addresses')}
+            className="flex items-center justify-between w-full px-4 py-4 hover:bg-gray-50 transition-colors"
           >
             <div className="flex items-center space-x-3">
               <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
@@ -103,9 +145,12 @@ const MobileProfilePage = () => {
               <span className="font-medium text-gray-900">My Addresses</span>
             </div>
             <ChevronRight className="w-5 h-5 text-gray-400" />
-          </Link>
+          </button>
 
-          <div className="flex items-center justify-between px-4 py-4 hover:bg-gray-50 transition-colors">
+          <button
+            onClick={() => handleQuickAction('Notifications & Alerts')}
+            className="flex items-center justify-between w-full px-4 py-4 hover:bg-gray-50 transition-colors"
+          >
             <div className="flex items-center space-x-3">
               <div className="w-10 h-10 bg-yellow-100 rounded-lg flex items-center justify-center">
                 <Bell className="w-5 h-5 text-yellow-600" />
@@ -113,9 +158,12 @@ const MobileProfilePage = () => {
               <span className="font-medium text-gray-900">Notifications & Alerts</span>
             </div>
             <ChevronRight className="w-5 h-5 text-gray-400" />
-          </div>
+          </button>
 
-          <div className="flex items-center justify-between px-4 py-4 hover:bg-gray-50 transition-colors">
+          <button
+            onClick={() => handleQuickAction('Account Settings')}
+            className="flex items-center justify-between w-full px-4 py-4 hover:bg-gray-50 transition-colors"
+          >
             <div className="flex items-center space-x-3">
               <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
                 <Settings className="w-5 h-5 text-purple-600" />
@@ -123,9 +171,12 @@ const MobileProfilePage = () => {
               <span className="font-medium text-gray-900">Account Settings</span>
             </div>
             <ChevronRight className="w-5 h-5 text-gray-400" />
-          </div>
+          </button>
 
-          <div className="flex items-center justify-between px-4 py-4 hover:bg-gray-50 transition-colors">
+          <button
+            onClick={() => handleQuickAction('Help & Support')}
+            className="flex items-center justify-between w-full px-4 py-4 hover:bg-gray-50 transition-colors"
+          >
             <div className="flex items-center space-x-3">
               <div className="w-10 h-10 bg-indigo-100 rounded-lg flex items-center justify-center">
                 <HelpCircle className="w-5 h-5 text-indigo-600" />
@@ -133,7 +184,7 @@ const MobileProfilePage = () => {
               <span className="font-medium text-gray-900">Help & Support</span>
             </div>
             <ChevronRight className="w-5 h-5 text-gray-400" />
-          </div>
+          </button>
 
           <button
             onClick={handleLogout}
@@ -166,7 +217,10 @@ const MobileProfilePage = () => {
                 </span>
               </div>
               <p className="text-sm text-gray-600 mb-3">2 items • Packed</p>
-              <button className="w-full bg-emerald-600 text-white py-2 px-4 rounded-lg font-medium hover:bg-emerald-700 transition-colors">
+              <button
+                onClick={handleTrackOrder}
+                className="w-full bg-emerald-600 text-white py-2 px-4 rounded-lg font-medium hover:bg-emerald-700 transition-colors"
+              >
                 Track Now
               </button>
             </div>
@@ -179,24 +233,30 @@ const MobileProfilePage = () => {
         <div className="p-4">
           <h2 className="text-lg font-semibold text-gray-900 mb-4">Quick Links</h2>
           <div className="grid grid-cols-3 gap-4">
-            <button className="flex flex-col items-center p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
+            <button
+              onClick={() => handleQuickAction('Reorder')}
+              className="flex flex-col items-center p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
+            >
               <div className="w-10 h-10 bg-emerald-100 rounded-lg flex items-center justify-center mb-2">
                 <RotateCcw className="w-5 h-5 text-emerald-600" />
               </div>
               <span className="text-sm font-medium text-gray-900">Reorder</span>
             </button>
 
-            <Link
-              to="/profile"
+            <button
+              onClick={() => handleQuickAction('Update Info')}
               className="flex flex-col items-center p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
             >
               <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center mb-2">
                 <UserCheck className="w-5 h-5 text-blue-600" />
               </div>
               <span className="text-sm font-medium text-gray-900">Update Info</span>
-            </Link>
+            </button>
 
-            <button className="flex flex-col items-center p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
+            <button
+              onClick={() => handleQuickAction('Help Chat')}
+              className="flex flex-col items-center p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
+            >
               <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center mb-2">
                 <MessageCircle className="w-5 h-5 text-purple-600" />
               </div>

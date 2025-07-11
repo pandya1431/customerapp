@@ -15,29 +15,62 @@ import {
   MessageCircle,
   ChevronRight
 } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 import toast from 'react-hot-toast';
 
 const AccountPage = () => {
   const { user, logout, isAuthenticated } = useAuth();
+  const navigate = useNavigate();
   const [activeSection, setActiveSection] = useState('profile');
 
   const handleLogout = () => {
     logout();
     toast.success('Logged out successfully');
+    navigate('/');
   };
 
   const handleTrackOrder = () => {
     toast.success('Redirecting to order tracking...');
+    navigate('/orders');
   };
 
   const handleEditAddress = () => {
     toast.success('Opening address editor...');
+    navigate('/addresses');
   };
 
   const handleQuickAction = (action) => {
-    toast.success(`${action} clicked`);
+    switch (action) {
+      case 'Reorder':
+        toast.success('Finding your previous orders...');
+        navigate('/orders');
+        break;
+      case 'Update Info':
+        toast.success('Opening profile editor...');
+        navigate('/profile');
+        break;
+      case 'Help Chat':
+        toast.success('Starting help chat...');
+        break;
+      case 'My Orders':
+        navigate('/orders');
+        break;
+      case 'My Addresses':
+        navigate('/addresses');
+        break;
+      case 'Notifications & Alerts':
+        toast.success('Opening notifications settings...');
+        break;
+      case 'Account Settings':
+        toast.success('Opening account settings...');
+        break;
+      case 'Help & Support':
+        toast.success('Opening help center...');
+        break;
+      default:
+        toast.success(`${action} clicked`);
+    }
   };
 
   if (!isAuthenticated) {
@@ -59,12 +92,12 @@ const AccountPage = () => {
   }
 
   const sidebarItems = [
-    { id: 'profile', label: 'My Profile', icon: User, active: true },
-    { id: 'orders', label: 'My Orders', icon: ShoppingCart },
-    { id: 'addresses', label: 'My Addresses', icon: MapPin },
-    { id: 'notifications', label: 'Notifications & Alerts', icon: Bell },
-    { id: 'settings', label: 'Account Settings', icon: Settings },
-    { id: 'help', label: 'Help & Support', icon: HelpCircle },
+    { id: 'profile', label: 'My Profile', icon: User, active: activeSection === 'profile' },
+    { id: 'orders', label: 'My Orders', icon: ShoppingCart, active: activeSection === 'orders' },
+    { id: 'addresses', label: 'My Addresses', icon: MapPin, active: activeSection === 'addresses' },
+    { id: 'notifications', label: 'Notifications & Alerts', icon: Bell, active: activeSection === 'notifications' },
+    { id: 'settings', label: 'Account Settings', icon: Settings, active: activeSection === 'settings' },
+    { id: 'help', label: 'Help & Support', icon: HelpCircle, active: activeSection === 'help' },
     { id: 'logout', label: 'Logout', icon: LogOut, isLogout: true }
   ];
 
@@ -99,6 +132,7 @@ const AccountPage = () => {
                       handleLogout();
                     } else {
                       setActiveSection(item.id);
+                      handleQuickAction(item.label);
                     }
                   }}
                   className={`w-full flex items-center space-x-3 px-6 py-4 text-left hover:bg-gray-50 transition-colors ${
