@@ -1,291 +1,499 @@
 import React, { useState, useEffect } from 'react';
-import { Package, Zap, Store, Globe, Eye, Calendar, MapPin } from 'lucide-react';
-import { ordersApi } from '../services/api';
-import LoadingSpinner from '../components/common/LoadingSpinner';
+import { useNavigate } from 'react-router-dom';
+import { MapPin, CreditCard, Truck, Shield, Edit, Plus } from 'lucide-react';
+import { useCart } from '../hooks/useCart';
 import { useAuth } from '../hooks/useAuth';
-import { formatCurrency, formatDate } from '../utils/helpers';
+import { formatCurrency } from '../utils/helpers';
+import { ordersApi } from '../services/api';
 import toast from 'react-hot-toast';
 
-const OrdersPage = () => {
-  const [orders, setOrders] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState('all');
+const CheckoutPage = () => {
+  const navigate = useNavigate();
+  const { cart, getCartTotal, clearCart } = useCart();
   const { user } = useAuth();
+  
+  const [selectedAddress, setSelectedAddress] = useState(null);
+  const [paymentMethod, setPaymentMethod] = useState('razorpay');
+  const [loading, setLoading] = useState(false);
+  const [showAddressForm, setShowAddressForm] = useState(false);
+  const [newAddress, setNewAddress] = useState({
+    type: 'home',
+    name: '',
+    phone: '',
+    street: '',
+    area: '',
+    city: '',
+    state: '',
+    pincode: '',
+    landmark: ''
+  });
 
-  // Mock orders data with product images
-  const mockOrders = [
+  // Mock addresses - in real app, fetch from API
+  const [addresses, setAddresses] = useState([
     {
-      id: 'GRO-12345',
-      orderNumber: 'Order #12345',
-      status: 'delivered',
-      total: 1548,
-      orderType: 'express',
-      createdAt: '2024-04-15T11:31:00Z',
-      vendor: 'Express',
-      items: [
-        { name: 'Green Bottle', image: 'https://images.pexels.com/photos/4465124/pexels-photo-4465124.jpeg?auto=compress&cs=tinysrgb&w=100' },
-        { name: 'Headphones', image: 'https://images.pexels.com/photos/3394650/pexels-photo-3394650.jpeg?auto=compress&cs=tinysrgb&w=100' },
-        { name: 'T-shirt', image: 'https://images.pexels.com/photos/1020585/pexels-photo-1020585.jpeg?auto=compress&cs=tinysrgb&w=100' }
-      ],
-      customer: { email: 'customer@grooso.com' }
+      id: 1,
+      type: 'home',
+      name: 'John Doe',
+      phone: '+919876543210',
+      street: '123 MG Road',
+      area: 'Andheri West',
+      city: 'Mumbai',
+      state: 'Maharashtra',
+      pincode: '400058',
+      landmark: 'Near Metro Station',
+      isDefault: true
     },
     {
-      id: 'GRO-12344',
-      orderNumber: 'Order #12344',
-      status: 'pending',
-      total: 750,
-      orderType: 'citymart',
-      createdAt: '2024-04-12T09:20:00Z',
-      vendor: 'City Mart',
-      items: [
-        { name: 'Apple', image: 'https://images.pexels.com/photos/102104/pexels-photo-102104.jpeg?auto=compress&cs=tinysrgb&w=100' },
-        { name: 'Banana', image: 'https://images.pexels.com/photos/61127/pexels-photo-61127.jpeg?auto=compress&cs=tinysrgb&w=100' },
-        { name: 'Bread', image: 'https://images.pexels.com/photos/209206/pexels-photo-209206.jpeg?auto=compress&cs=tinysrgb&w=100' }
-      ],
-      customer: { email: 'customer@grooso.com' }
-    },
-    {
-      id: 'GRO-12343',
-      orderNumber: 'Order #12343',
-      status: 'delivered',
-      total: 2340,
-      orderType: 'nationwide',
-      createdAt: '2024-04-10T16:10:00Z',
-      vendor: 'Nationwide',
-      items: [
-        { name: 'Red Sofa', image: 'https://images.pexels.com/photos/1112598/pexels-photo-1112598.jpeg?auto=compress&cs=tinysrgb&w=100' },
-        { name: 'Sneakers', image: 'https://images.pexels.com/photos/2529148/pexels-photo-2529148.jpeg?auto=compress&cs=tinysrgb&w=100' },
-        { name: 'Watch', image: 'https://images.pexels.com/photos/393047/pexels-photo-393047.jpeg?auto=compress&cs=tinysrgb&w=100' }
-      ],
-      customer: { email: 'customer@grooso.com' }
-    },
-    {
-      id: 'GRO-12342',
-      orderNumber: 'Order #12342',
-      status: 'cancelled',
-      total: 899,
-      orderType: 'express',
-      createdAt: '2024-04-08T14:25:00Z',
-      vendor: 'Express',
-      items: [
-        { name: 'Pizza', image: 'https://images.pexels.com/photos/315755/pexels-photo-315755.jpeg?auto=compress&cs=tinysrgb&w=100' },
-        { name: 'Burger', image: 'https://images.pexels.com/photos/1639557/pexels-photo-1639557.jpeg?auto=compress&cs=tinysrgb&w=100' },
-        { name: 'Fries', image: 'https://images.pexels.com/photos/1893556/pexels-photo-1893556.jpeg?auto=compress&cs=tinysrgb&w=100' }
-      ],
-      customer: { email: 'customer@grooso.com' }
+      id: 2,
+      type: 'work',
+      name: 'John Doe',
+      phone: '+919876543210',
+      street: '456 Business Park',
+      area: 'Bandra Kurla Complex',
+      city: 'Mumbai',
+      state: 'Maharashtra',
+      pincode: '400051',
+      landmark: 'Tower B, 5th Floor',
+      isDefault: false
     }
-  ];
+  ]);
 
   useEffect(() => {
-    fetchOrders();
-  }, []);
+    if (cart.length === 0) {
+      navigate('/cart');
+      return;
+    }
+    
+    // Set default address
+    const defaultAddress = addresses.find(addr => addr.isDefault);
+    if (defaultAddress) {
+      setSelectedAddress(defaultAddress);
+    }
+  }, [cart, addresses, navigate]);
 
-  const fetchOrders = async () => {
+  const handleAddAddress = () => {
+    if (!newAddress.name || !newAddress.phone || !newAddress.street || !newAddress.pincode) {
+      toast.error('Please fill all required fields');
+      return;
+    }
+
+    const address = {
+      ...newAddress,
+      id: Date.now(),
+      isDefault: addresses.length === 0
+    };
+
+    setAddresses([...addresses, address]);
+    setSelectedAddress(address);
+    setShowAddressForm(false);
+    setNewAddress({
+      type: 'home',
+      name: '',
+      phone: '',
+      street: '',
+      area: '',
+      city: '',
+      state: '',
+      pincode: '',
+      landmark: ''
+    });
+    toast.success('Address added successfully');
+  };
+
+  const loadRazorpayScript = () => {
+    return new Promise((resolve) => {
+      const script = document.createElement('script');
+      script.src = 'https://checkout.razorpay.com/v1/checkout.js';
+      script.onload = () => resolve(true);
+      script.onerror = () => resolve(false);
+      document.body.appendChild(script);
+    });
+  };
+
+  const handleRazorpayPayment = async (orderData) => {
+    const res = await loadRazorpayScript();
+    
+    if (!res) {
+      toast.error('Razorpay SDK failed to load. Please check your connection.');
+      return;
+    }
+
+    const options = {
+      key: 'rzp_test_9999999999', // Replace with your Razorpay key
+      amount: orderData.total * 100, // Amount in paise
+      currency: 'INR',
+      name: 'Grooso',
+      description: 'Order Payment',
+      order_id: orderData.razorpay_order_id, // This should come from backend
+      handler: async (response) => {
+        try {
+          // Verify payment on backend
+          const paymentData = {
+            razorpay_payment_id: response.razorpay_payment_id,
+            razorpay_order_id: response.razorpay_order_id,
+            razorpay_signature: response.razorpay_signature,
+            order_id: orderData.id
+          };
+          
+          // In real app, verify payment with backend
+          console.log('Payment successful:', paymentData);
+          
+          clearCart();
+          toast.success('Payment successful!');
+          navigate(`/order-success/${orderData.id}`);
+        } catch (error) {
+          toast.error('Payment verification failed');
+        }
+      },
+      prefill: {
+        name: user?.name || '',
+        email: user?.email || '',
+        contact: selectedAddress?.phone || ''
+      },
+      notes: {
+        address: `${selectedAddress?.street}, ${selectedAddress?.area}, ${selectedAddress?.city}`
+      },
+      theme: {
+        color: '#10b981'
+      }
+    };
+
+    const paymentObject = new window.Razorpay(options);
+    paymentObject.open();
+  };
+
+  const handlePlaceOrder = async () => {
+    if (!selectedAddress) {
+      toast.error('Please select a delivery address');
+      return;
+    }
+
+    setLoading(true);
+
     try {
-      // Using mock data for demonstration
-      const userOrders = mockOrders.filter(order => 
-        order.customer.email === user?.email
-      );
-      setOrders(userOrders);
+      const orderData = {
+        items: cart.map(item => ({
+          productId: item.id,
+          name: item.name,
+          price: item.price,
+          quantity: item.quantity
+        })),
+        deliveryAddress: selectedAddress,
+        paymentMethod,
+        total: getCartTotal()
+      };
+
+      const response = await ordersApi.createOrder(orderData);
+      
+      if (paymentMethod === 'razorpay') {
+        await handleRazorpayPayment(response.data);
+      } else if (paymentMethod === 'cod') {
+        clearCart();
+        toast.success('Order placed successfully!');
+        navigate(`/order-success/${response.data.id}`);
+      }
     } catch (error) {
-      console.error('Error fetching orders:', error);
+      toast.error('Failed to place order. Please try again.');
     } finally {
       setLoading(false);
     }
   };
 
-  const getFilteredOrders = () => {
-    if (activeTab === 'all') return orders;
-    return orders.filter(order => order.status === activeTab);
-  };
-
-  const getStatusColor = (status) => {
-    const colors = {
-      pending: 'bg-yellow-100 text-yellow-800',
-      delivered: 'bg-green-100 text-green-800',
-      cancelled: 'bg-red-100 text-red-800',
-      confirmed: 'bg-blue-100 text-blue-800'
-    };
-    return colors[status] || 'bg-gray-100 text-gray-800';
-  };
-
-  const getVendorIcon = (orderType) => {
-    switch (orderType) {
-      case 'express':
-        return <Zap className="w-4 h-4 text-emerald-600" />;
-      case 'citymart':
-        return <Store className="w-4 h-4 text-emerald-600" />;
-      case 'nationwide':
-        return <Globe className="w-4 h-4 text-emerald-600" />;
-      default:
-        return <Package className="w-4 h-4 text-emerald-600" />;
-    }
-  };
-
-  const handleViewDetails = (orderId) => {
-    toast.success(`Opening details for ${orderId}`);
-    // Navigate to order details page
-  };
-
-  const tabs = [
-    { id: 'all', label: 'All', count: orders.length },
-    { id: 'pending', label: 'Pending', count: orders.filter(o => o.status === 'pending').length },
-    { id: 'delivered', label: 'Delivered', count: orders.filter(o => o.status === 'delivered').length },
-    { id: 'cancelled', label: 'Cancelled', count: orders.filter(o => o.status === 'cancelled').length }
-  ];
-
-  const filteredOrders = getFilteredOrders();
-
-  if (loading) {
-    return (
-      <div className="flex justify-center items-center h-64">
-        <LoadingSpinner text="Loading your orders..." />
-      </div>
-    );
-  }
+  const total = getCartTotal();
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Mobile Back Arrow - Only visible on mobile */}
-        <div className="md:hidden mb-6 flex items-center space-x-3">
-          <button
-            onClick={() => window.history.back()}
-            className="text-gray-800 hover:text-emerald-600 transition-colors p-2 touch-manipulation text-2xl"
-            aria-label="Go back"
-          >
-            ←
-          </button>
-          <h1 className="text-2xl font-bold text-gray-900">My Orders</h1>
-        </div>
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="mb-8">
+        <h1 className="text-2xl font-bold text-gray-900">Checkout</h1>
+        <p className="text-gray-600 mt-1">Review your order and complete your purchase</p>
+      </div>
 
-        {/* Desktop Header */}
-        <div className="hidden md:block mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">My Orders</h1>
-          <p className="text-gray-600 mt-2">Track and manage your orders</p>
-        </div>
-
-        {/* Tabs */}
-        <div className="mb-6">
-          <div className="flex space-x-1 bg-gray-100 p-1 rounded-lg overflow-x-auto">
-            {tabs.map((tab) => (
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        {/* Main Content */}
+        <div className="lg:col-span-2 space-y-6">
+          {/* Delivery Address */}
+          <div className="bg-white rounded-lg shadow-sm border p-6">
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center space-x-2">
+                <MapPin className="w-5 h-5 text-emerald-600" />
+                <h2 className="text-lg font-semibold">Delivery Address</h2>
+              </div>
               <button
-                key={tab.id}
-                onClick={() => setActiveTab(tab.id)}
-                className={`flex-1 min-w-0 px-4 py-3 text-sm font-medium rounded-md transition-colors whitespace-nowrap ${
-                  activeTab === tab.id
-                    ? 'bg-emerald-600 text-white shadow-sm'
-                    : 'text-gray-600 hover:text-gray-900 hover:bg-white'
-                }`}
+                onClick={() => setShowAddressForm(true)}
+                className="flex items-center space-x-1 text-emerald-600 hover:text-emerald-700"
               >
-                <div className="flex flex-col items-center">
-                  <span>{tab.label}</span>
-                  {tab.count > 0 && (
-                    <span className={`text-xs mt-1 block ${
-                      activeTab === tab.id ? 'text-emerald-100' : 'text-gray-400'
-                    }`}>
-                      {tab.count} order{tab.count !== 1 ? 's' : ''}
-                    </span>
-                  )}
-                </div>
+                <Plus className="w-4 h-4" />
+                <span>Add New</span>
               </button>
-            ))}
-          </div>
-        </div>
+            </div>
 
-        {/* Orders List */}
-        <div className="space-y-4">
-          {filteredOrders.length > 0 ? (
-            filteredOrders.map((order) => (
-              <div key={order.id} className="bg-white rounded-lg shadow-sm border p-6 hover:shadow-md transition-shadow">
-                {/* Order Header */}
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-4">
-                  <div className="flex items-center space-x-3 mb-2 sm:mb-0">
-                    <div className="w-10 h-10 bg-emerald-100 rounded-lg flex items-center justify-center">
-                      {getVendorIcon(order.orderType)}
-                    </div>
-                    <div>
-                      <h3 className="font-semibold text-lg text-gray-900">{order.orderNumber}</h3>
-                      <div className="flex items-center space-x-2 text-sm text-gray-600">
-                        <Calendar className="w-3 h-3" />
-                        <span>{formatDate(order.createdAt)}</span>
-                      </div>
-                    </div>
-                  </div>
-                  <span className={`inline-flex px-3 py-1 rounded-full text-sm font-medium capitalize ${getStatusColor(order.status)}`}>
-                    {order.status}
-                  </span>
-                </div>
-
-                {/* Vendor Info */}
-                <div className="flex items-center space-x-2 mb-4">
-                  {getVendorIcon(order.orderType)}
-                  <span className="font-medium text-gray-900">{order.vendor}</span>
-                </div>
-
-                {/* Product Images */}
-                <div className="flex items-center space-x-3 mb-4">
-                  {order.items.slice(0, 3).map((item, index) => (
-                    <img
-                      key={index}
-                      src={item.image}
-                      alt={item.name}
-                      className="w-12 h-12 object-cover rounded-lg border border-gray-200"
+            {showAddressForm && (
+              <div className="mb-6 p-4 border border-gray-200 rounded-lg">
+                <h3 className="font-medium mb-4">Add New Address</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Full Name *</label>
+                    <input
+                      type="text"
+                      value={newAddress.name}
+                      onChange={(e) => setNewAddress({...newAddress, name: e.target.value})}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500"
                     />
-                  ))}
-                  {order.items.length > 3 && (
-                    <div className="w-12 h-12 bg-gray-100 rounded-lg border border-gray-200 flex items-center justify-center">
-                      <span className="text-xs text-gray-600">+{order.items.length - 3}</span>
-                    </div>
-                  )}
-                </div>
-
-                {/* Order Footer */}
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between pt-4 border-t border-gray-100">
-                  <div className="mb-3 sm:mb-0">
-                    <span className="text-2xl font-bold text-gray-900">
-                      {formatCurrency(order.total)}
-                    </span>
                   </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Phone Number *</label>
+                    <input
+                      type="tel"
+                      value={newAddress.phone}
+                      onChange={(e) => setNewAddress({...newAddress, phone: e.target.value})}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500"
+                    />
+                  </div>
+                  <div className="md:col-span-2">
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Street Address *</label>
+                    <input
+                      type="text"
+                      value={newAddress.street}
+                      onChange={(e) => setNewAddress({...newAddress, street: e.target.value})}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Area</label>
+                    <input
+                      type="text"
+                      value={newAddress.area}
+                      onChange={(e) => setNewAddress({...newAddress, area: e.target.value})}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">City</label>
+                    <input
+                      type="text"
+                      value={newAddress.city}
+                      onChange={(e) => setNewAddress({...newAddress, city: e.target.value})}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">State</label>
+                    <input
+                      type="text"
+                      value={newAddress.state}
+                      onChange={(e) => setNewAddress({...newAddress, state: e.target.value})}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Pincode *</label>
+                    <input
+                      type="text"
+                      value={newAddress.pincode}
+                      onChange={(e) => setNewAddress({...newAddress, pincode: e.target.value})}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500"
+                    />
+                  </div>
+                  <div className="md:col-span-2">
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Landmark</label>
+                    <input
+                      type="text"
+                      value={newAddress.landmark}
+                      onChange={(e) => setNewAddress({...newAddress, landmark: e.target.value})}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500"
+                    />
+                  </div>
+                </div>
+                <div className="flex space-x-3 mt-4">
                   <button
-                    onClick={() => handleViewDetails(order.orderNumber)}
-                    className="flex items-center space-x-2 bg-white border border-gray-300 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-50 transition-colors"
+                    onClick={handleAddAddress}
+                    className="bg-emerald-600 text-white px-4 py-2 rounded-lg hover:bg-emerald-700"
                   >
-                    <Eye className="w-4 h-4" />
-                    <span>View Details</span>
+                    Save Address
+                  </button>
+                  <button
+                    onClick={() => setShowAddressForm(false)}
+                    className="bg-gray-100 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-200"
+                  >
+                    Cancel
                   </button>
                 </div>
               </div>
-            ))
-          ) : (
-            /* Empty State */
-            <div className="text-center py-12">
-              <div className="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <Package className="w-12 h-12 text-gray-400" />
-              </div>
-              <h3 className="text-lg font-medium text-gray-900 mb-2">
-                {activeTab === 'all' ? 'No orders found' : `No ${activeTab} orders`}
-              </h3>
-              <p className="text-gray-500 mb-6">
-                {activeTab === 'all' 
-                  ? "You haven't placed any orders yet" 
-                  : `You don't have any ${activeTab} orders`
-                }
-              </p>
-              {activeTab === 'all' && (
-                <a
-                  href="/"
-                  className="inline-flex items-center space-x-2 bg-emerald-600 text-white px-6 py-3 rounded-lg hover:bg-emerald-700 transition-colors"
+            )}
+
+            <div className="space-y-3">
+              {addresses.map((address) => (
+                <div
+                  key={address.id}
+                  className={`p-4 border rounded-lg cursor-pointer transition-colors ${
+                    selectedAddress?.id === address.id
+                      ? 'border-emerald-500 bg-emerald-50'
+                      : 'border-gray-200 hover:border-gray-300'
+                  }`}
+                  onClick={() => setSelectedAddress(address)}
                 >
-                  <span>Start Shopping</span>
-                </a>
-              )}
+                  <div className="flex items-start justify-between">
+                    <div className="flex-1">
+                      <div className="flex items-center space-x-2 mb-1">
+                        <span className="font-medium">{address.name}</span>
+                        <span className={`text-xs px-2 py-1 rounded-full ${
+                          address.type === 'home' ? 'bg-blue-100 text-blue-800' : 'bg-purple-100 text-purple-800'
+                        }`}>
+                          {address.type}
+                        </span>
+                        {address.isDefault && (
+                          <span className="text-xs px-2 py-1 rounded-full bg-emerald-100 text-emerald-800">
+                            Default
+                          </span>
+                        )}
+                      </div>
+                      <p className="text-sm text-gray-600">{address.phone}</p>
+                      <p className="text-sm text-gray-700 mt-1">
+                        {address.street}, {address.area}, {address.city}, {address.state} - {address.pincode}
+                      </p>
+                      {address.landmark && (
+                        <p className="text-sm text-gray-500 mt-1">Landmark: {address.landmark}</p>
+                      )}
+                    </div>
+                    <button className="text-emerald-600 hover:text-emerald-700 p-1">
+                      <Edit className="w-4 h-4" />
+                    </button>
+                  </div>
+                </div>
+              ))}
             </div>
-          )}
+          </div>
+
+          {/* Payment Method */}
+          <div className="bg-white rounded-lg shadow-sm border p-6">
+            <div className="flex items-center space-x-2 mb-4">
+              <CreditCard className="w-5 h-5 text-emerald-600" />
+              <h2 className="text-lg font-semibold">Payment Method</h2>
+            </div>
+
+            <div className="space-y-3">
+              <div
+                className={`p-4 border rounded-lg cursor-pointer transition-colors ${
+                  paymentMethod === 'razorpay'
+                    ? 'border-emerald-500 bg-emerald-50'
+                    : 'border-gray-200 hover:border-gray-300'
+                }`}
+                onClick={() => setPaymentMethod('razorpay')}
+              >
+                <div className="flex items-center space-x-3">
+                  <input
+                    type="radio"
+                    checked={paymentMethod === 'razorpay'}
+                    onChange={() => setPaymentMethod('razorpay')}
+                    className="text-emerald-600"
+                  />
+                  <div>
+                    <div className="font-medium">Credit/Debit Card, UPI, Net Banking</div>
+                    <div className="text-sm text-gray-600">Powered by Razorpay</div>
+                  </div>
+                </div>
+              </div>
+
+              <div
+                className={`p-4 border rounded-lg cursor-pointer transition-colors ${
+                  paymentMethod === 'cod'
+                    ? 'border-emerald-500 bg-emerald-50'
+                    : 'border-gray-200 hover:border-gray-300'
+                }`}
+                onClick={() => setPaymentMethod('cod')}
+              >
+                <div className="flex items-center space-x-3">
+                  <input
+                    type="radio"
+                    checked={paymentMethod === 'cod'}
+                    onChange={() => setPaymentMethod('cod')}
+                    className="text-emerald-600"
+                  />
+                  <div>
+                    <div className="font-medium">Cash on Delivery</div>
+                    <div className="text-sm text-gray-600">Pay when you receive your order</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Order Summary */}
+        <div className="lg:col-span-1">
+          <div className="bg-white rounded-lg shadow-sm border p-6 sticky top-4">
+            <h2 className="text-lg font-semibold mb-4">Order Summary</h2>
+            
+            {/* Items */}
+            <div className="space-y-3 mb-4">
+              {cart.map((item) => (
+                <div key={item.id} className="flex items-center space-x-3">
+                  <img
+                    src={item.image}
+                    alt={item.name}
+                    className="w-12 h-12 object-cover rounded"
+                  />
+                  <div className="flex-1">
+                    <div className="text-sm font-medium">{item.name}</div>
+                    <div className="text-xs text-gray-600">Qty: {item.quantity}</div>
+                  </div>
+                  <div className="text-sm font-medium">
+                    {formatCurrency(item.price * item.quantity)}
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            <div className="border-t pt-4 space-y-2">
+              <div className="flex justify-between text-sm">
+                <span>Subtotal</span>
+                <span>{formatCurrency(total - 50 - (total * 0.18))}</span>
+              </div>
+              <div className="flex justify-between text-sm">
+                <span>Delivery Fee</span>
+                <span>{formatCurrency(50)}</span>
+              </div>
+              <div className="flex justify-between text-sm">
+                <span>Taxes</span>
+                <span>{formatCurrency(total * 0.18)}</span>
+              </div>
+              <div className="border-t pt-2">
+                <div className="flex justify-between font-semibold">
+                  <span>Total</span>
+                  <span className="text-emerald-600">{formatCurrency(total)}</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Delivery Info */}
+            <div className="mt-4 p-3 bg-emerald-50 rounded-lg">
+              <div className="flex items-center space-x-2">
+                <Truck className="w-4 h-4 text-emerald-600" />
+                <span className="text-sm font-medium text-emerald-800">
+                  Estimated delivery: 30-45 mins
+                </span>
+              </div>
+            </div>
+
+            {/* Place Order Button */}
+            <button
+              onClick={handlePlaceOrder}
+              disabled={loading || !selectedAddress}
+              className="w-full bg-emerald-600 text-white py-3 px-4 rounded-lg font-medium hover:bg-emerald-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed mt-6"
+            >
+              {loading ? 'Placing Order...' : `Place Order • ${formatCurrency(total)}`}
+            </button>
+
+            {/* Security Info */}
+            <div className="mt-4 flex items-center justify-center space-x-2 text-xs text-gray-500">
+              <Shield className="w-3 h-3" />
+              <span>Secure checkout with SSL encryption</span>
+            </div>
+          </div>
         </div>
       </div>
     </div>
   );
 };
 
-export default OrdersPage;
+export default CheckoutPage;

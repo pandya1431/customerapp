@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Package, Zap, Store, Globe, Eye, Calendar, MapPin, User } from 'lucide-react';
+import { Package, Zap, Store, Globe, Eye, Calendar, MapPin } from 'lucide-react';
 import { ordersApi } from '../services/api';
 import LoadingSpinner from '../components/common/LoadingSpinner';
 import { useAuth } from '../hooks/useAuth';
@@ -102,7 +102,7 @@ const OrdersPage = () => {
   const getStatusColor = (status) => {
     const colors = {
       pending: 'bg-yellow-100 text-yellow-800',
-      delivered: 'bg-emerald-600 text-white',
+      delivered: 'bg-green-100 text-green-800',
       cancelled: 'bg-red-100 text-red-800',
       confirmed: 'bg-blue-100 text-blue-800'
     };
@@ -112,13 +112,13 @@ const OrdersPage = () => {
   const getVendorIcon = (orderType) => {
     switch (orderType) {
       case 'express':
-        return <Zap className="w-5 h-5 text-emerald-600" />;
+        return <Zap className="w-4 h-4 text-emerald-600" />;
       case 'citymart':
-        return <Store className="w-5 h-5 text-emerald-600" />;
+        return <Store className="w-4 h-4 text-emerald-600" />;
       case 'nationwide':
-        return <Globe className="w-5 h-5 text-emerald-600" />;
+        return <Globe className="w-4 h-4 text-emerald-600" />;
       default:
-        return <Package className="w-5 h-5 text-emerald-600" />;
+        return <Package className="w-4 h-4 text-emerald-600" />;
     }
   };
 
@@ -128,10 +128,10 @@ const OrdersPage = () => {
   };
 
   const tabs = [
-    { id: 'all', label: 'All' },
-    { id: 'pending', label: 'Pending' },
-    { id: 'delivered', label: 'Delivered' },
-    { id: 'cancelled', label: 'Cancelled' }
+    { id: 'all', label: 'All', count: orders.length },
+    { id: 'pending', label: 'Pending', count: orders.filter(o => o.status === 'pending').length },
+    { id: 'delivered', label: 'Delivered', count: orders.filter(o => o.status === 'delivered').length },
+    { id: 'cancelled', label: 'Cancelled', count: orders.filter(o => o.status === 'cancelled').length }
   ];
 
   const filteredOrders = getFilteredOrders();
@@ -146,98 +146,100 @@ const OrdersPage = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Mobile Header */}
-      <div className="bg-white px-4 py-4">
-        <div className="flex items-center justify-between mb-6">
-          <h1 className="text-2xl font-bold text-emerald-600">Grooso</h1>
-          <User className="w-6 h-6 text-gray-600" />
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Header */}
+        <div className="mb-8">
+          <h1 className="text-2xl md:text-3xl font-bold text-gray-900">My Orders</h1>
+          <p className="text-gray-600 mt-1">Track and manage your orders</p>
         </div>
-        
-        <h2 className="text-2xl font-bold text-gray-900 mb-6">My Orders</h2>
-        
-        {/* Tabs */}
-        <div className="flex space-x-1">
-          {tabs.map((tab) => (
-            <button
-              key={tab.id}
-              onClick={() => setActiveTab(tab.id)}
-              className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
-                activeTab === tab.id
-                  ? 'bg-emerald-600 text-white'
-                  : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-              }`}
-            >
-              {tab.label}
-            </button>
-          ))}
-        </div>
-      </div>
 
-      {/* Orders List */}
-      <div className="px-4 pb-20">
+        {/* Tab Filters */}
+        <div className="bg-white rounded-lg shadow-sm border mb-6 overflow-hidden">
+          <div className="flex overflow-x-auto">
+            {tabs.map((tab) => (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id)}
+                className={`flex-1 min-w-0 px-4 py-4 text-sm font-medium transition-all duration-200 ${
+                  activeTab === tab.id
+                    ? 'bg-emerald-600 text-white'
+                    : 'text-gray-600 hover:text-emerald-600 hover:bg-emerald-50'
+                }`}
+              >
+                <span className="block">{tab.label}</span>
+                {tab.count > 0 && (
+                  <span className={`text-xs mt-1 block ${
+                    activeTab === tab.id ? 'text-emerald-100' : 'text-gray-400'
+                  }`}>
+                    {tab.count} order{tab.count !== 1 ? 's' : ''}
+                  </span>
+                )}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Orders List */}
         <div className="space-y-4">
           {filteredOrders.length > 0 ? (
             filteredOrders.map((order) => (
-              <div key={order.id} className="bg-white rounded-lg p-4 shadow-sm">
+              <div key={order.id} className="bg-white rounded-lg shadow-sm border p-6 hover:shadow-md transition-shadow">
                 {/* Order Header */}
-                <div className="flex items-start justify-between mb-3">
-                  <div className="flex items-center space-x-3">
-                    <div className="w-8 h-8 bg-emerald-100 rounded-lg flex items-center justify-center">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-4">
+                  <div className="flex items-center space-x-3 mb-2 sm:mb-0">
+                    <div className="w-10 h-10 bg-emerald-100 rounded-lg flex items-center justify-center">
                       {getVendorIcon(order.orderType)}
                     </div>
                     <div>
-                      <h3 className="font-semibold text-gray-900">{order.orderNumber}</h3>
-                      <p className="text-sm text-gray-500">
-                        {new Date(order.createdAt).toLocaleDateString('en-US', {
-                          month: 'short',
-                          day: 'numeric',
-                          year: 'numeric'
-                        })} • {new Date(order.createdAt).toLocaleTimeString('en-US', {
-                          hour: 'numeric',
-                          minute: '2-digit',
-                          hour12: true
-                        })}
-                      </p>
+                      <h3 className="font-semibold text-lg text-gray-900">{order.orderNumber}</h3>
+                      <div className="flex items-center space-x-2 text-sm text-gray-600">
+                        <Calendar className="w-3 h-3" />
+                        <span>{formatDate(order.createdAt)}</span>
+                      </div>
                     </div>
                   </div>
-                  <span className={`px-3 py-1 rounded-full text-sm font-medium ${getStatusColor(order.status)}`}>
-                    {order.status === 'delivered' ? 'Delivered' : 
-                     order.status === 'pending' ? 'Pending' : 
-                     order.status.charAt(0).toUpperCase() + order.status.slice(1)}
+                  <span className={`inline-flex px-3 py-1 rounded-full text-sm font-medium capitalize ${getStatusColor(order.status)}`}>
+                    {order.status}
                   </span>
                 </div>
 
                 {/* Vendor Info */}
-                <div className="flex items-center space-x-2 mb-3">
-                  <div className="w-4 h-4 bg-emerald-600 rounded-full flex items-center justify-center">
-                    <div className="w-2 h-2 bg-white rounded-full"></div>
-                  </div>
+                <div className="flex items-center space-x-2 mb-4">
+                  {getVendorIcon(order.orderType)}
                   <span className="font-medium text-gray-900">{order.vendor}</span>
                 </div>
 
                 {/* Product Images */}
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-3">
-                    {order.items.slice(0, 3).map((item, index) => (
-                      <img
-                        key={index}
-                        src={item.image}
-                        alt={item.name}
-                        className="w-12 h-12 object-cover rounded-lg"
-                      />
-                    ))}
-                  </div>
-                  <div className="text-right">
-                    <div className="text-xl font-bold text-gray-900 mb-2">
-                      {formatCurrency(order.total)}
+                <div className="flex items-center space-x-3 mb-4">
+                  {order.items.slice(0, 3).map((item, index) => (
+                    <img
+                      key={index}
+                      src={item.image}
+                      alt={item.name}
+                      className="w-12 h-12 object-cover rounded-lg border border-gray-200"
+                    />
+                  ))}
+                  {order.items.length > 3 && (
+                    <div className="w-12 h-12 bg-gray-100 rounded-lg border border-gray-200 flex items-center justify-center">
+                      <span className="text-xs text-gray-600">+{order.items.length - 3}</span>
                     </div>
-                    <button
-                      onClick={() => handleViewDetails(order.orderNumber)}
-                      className="border border-gray-300 text-gray-700 px-4 py-2 rounded-lg text-sm font-medium hover:bg-gray-50 transition-colors"
-                    >
-                      View Details
-                    </button>
+                  )}
+                </div>
+
+                {/* Order Footer */}
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between pt-4 border-t border-gray-100">
+                  <div className="mb-3 sm:mb-0">
+                    <span className="text-2xl font-bold text-gray-900">
+                      {formatCurrency(order.total)}
+                    </span>
                   </div>
+                  <button
+                    onClick={() => handleViewDetails(order.orderNumber)}
+                    className="flex items-center space-x-2 bg-white border border-gray-300 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-50 transition-colors"
+                  >
+                    <Eye className="w-4 h-4" />
+                    <span>View Details</span>
+                  </button>
                 </div>
               </div>
             ))
