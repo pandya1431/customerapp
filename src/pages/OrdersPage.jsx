@@ -159,35 +159,7 @@ const OrdersPage = () => {
                   </span>
                 )}
               </button>
-          </button>
-          <span className="text-emerald-600 text-2xl font-bold">Grooso</span>
-          <h1 className="text-xl font-semibold text-gray-900">My Orders</h1>
-        </div>
-
-        {/* Desktop Tabs */}
-        <div className="hidden md:block mb-8">
-          <div className="flex space-x-2">
-            {tabs.map((tab) => (
-              <button
-                key={tab.id}
-                onClick={() => setActiveTab(tab.id)}
-                className={`flex-1 min-w-0 px-4 py-4 text-sm font-medium transition-all duration-200 ${
-                  activeTab === tab.id
-                    ? 'bg-emerald-600 text-white'
-                    : 'text-gray-600 hover:text-emerald-600 hover:bg-emerald-50'
-                }`}
-              >
-                <span className="block">{tab.label}</span>
-                {tab.count > 0 && (
-                  <span className={`text-xs mt-1 block ${
-                    activeTab === tab.id ? 'text-emerald-100' : 'text-gray-400'
-                  }`}>
-                    {tab.count} order{tab.count !== 1 ? 's' : ''}
-                  </span>
-                )}
-              </button>
             ))}
-          </div>
           </div>
         </div>
 
