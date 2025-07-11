@@ -155,6 +155,8 @@ const OrdersPage = () => {
             aria-label="Go back"
           >
             ←
+          </button>
+        </div>
         {/* Orders List */}
         <div className="space-y-4">
           {filteredOrders.length > 0 ? (
