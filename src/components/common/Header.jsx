@@ -24,7 +24,6 @@ const Header = ({ onSearchChange }) => {
     setIsMenuOpen(false);
   };
 
-
   return (
     <header className="bg-white shadow-sm border-b sticky top-0 z-50">
       {/* Top bar */}
@@ -53,14 +52,13 @@ const Header = ({ onSearchChange }) => {
             </Link>
           </div>
 
-
-          {/* Search Bar */}
+          {/* Search Bar - Desktop */}
           <div className="hidden lg:block flex-1 max-w-lg mx-8">
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
               <input
                 type="text"
-                placeholder="Smart Search"
+                placeholder="Search products"
                 value={searchQuery}
                 onChange={handleSearch}
                 className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
@@ -70,9 +68,9 @@ const Header = ({ onSearchChange }) => {
 
           {/* Right Side Actions */}
           <div className="flex items-center space-x-4">
-            {/* Wishlist Button */}
+            {/* Wishlist Button - Desktop */}
             {isAuthenticated && (
-              <button className="relative p-2 text-gray-600 hover:text-emerald-600 transition-colors">
+              <button className="hidden md:block relative p-2 text-gray-600 hover:text-emerald-600 transition-colors">
                 <Heart className="w-6 h-6" />
               </button>
             )}
@@ -90,96 +88,62 @@ const Header = ({ onSearchChange }) => {
               )}
             </button>
 
-            {/* User Menu */}
-            <div className="relative">
+            {/* Profile Menu - Desktop */}
+            <div className="relative hidden md:block">
               <button
                 onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
-                className="hidden md:flex items-center space-x-2 text-gray-600 hover:text-emerald-600 transition-colors"
+                className="flex items-center space-x-2 text-gray-600 hover:text-emerald-600 transition-colors p-2"
               >
-                <User className="w-6 h-6" />
+                <div className="w-8 h-8 bg-emerald-600 rounded-full flex items-center justify-center">
+                  <User className="w-5 h-5 text-white" />
+                </div>
                 {isAuthenticated && (
                   <>
                     <span className="text-sm font-medium">
-                    {user?.name?.split(' ')[0]}
+                      {user?.name?.split(' ')[0] || 'John'}
                     </span>
                     <ChevronDown className="w-4 h-4" />
                   </>
                 )}
               </button>
 
-              {/* User Dropdown Menu */}
-              {isUserMenuOpen && isAuthenticated && (
-                <div className="absolute right-0 mt-2 w-64 bg-white rounded-lg shadow-xl py-2 z-50 border border-gray-100">
-                  <div className="px-4 py-3 text-sm text-gray-500 border-b border-gray-100">
-                    {user?.email}
-                  </div>
-                  <Link 
-                    to="/profile" 
-                    className="flex items-center px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
-                    onClick={() => setIsUserMenuOpen(false)}
-                  >
-                    <User className="w-4 h-4 mr-3 text-gray-400" />
-                    My Profile
-                  </Link>
-                  <Link 
-                    to="/orders" 
-                    className="flex items-center px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
-                    onClick={() => setIsUserMenuOpen(false)}
-                  >
-                    <ShoppingCart className="w-4 h-4 mr-3 text-gray-400" />
-                    My Orders
-                  </Link>
-                  <Link 
-                    to="/addresses" 
-                    className="flex items-center px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
-                    onClick={() => setIsUserMenuOpen(false)}
-                  >
-                    <MapPin className="w-4 h-4 mr-3 text-gray-400" />
-                    My Addresses
-                  </Link>
-                  <button
-                    onClick={handleLogout}
-                    className="flex items-center w-full text-left px-4 py-3 text-sm text-red-600 hover:bg-red-50 transition-colors"
-                  >
-                    <X className="w-4 h-4 mr-3" />
-                    Logout
-                  </button>
-                </div>
-              )}
-
-              {/* Login/Register for non-authenticated users */}
-              {isUserMenuOpen && !isAuthenticated && (
-                <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-xl py-2 z-50 border border-gray-100">
+              {/* Desktop Dropdown Menu */}
+              {isUserMenuOpen && (
+                <div className="absolute right-0 mt-2 w-64 bg-white rounded-lg shadow-xl py-2 z-50 border border-gray-100 profile-dropdown">
                   {isAuthenticated ? (
                     <>
                       <div className="px-4 py-3 text-sm text-gray-500 border-b border-gray-100">
-                        {user?.email}
+                        {user?.email || 'customer@grooso.com'}
                       </div>
                       <Link 
-                        to="/profile" 
-                        className="block px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                        to="/account" 
+                        className="flex items-center px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
                         onClick={() => setIsUserMenuOpen(false)}
                       >
+                        <User className="w-4 h-4 mr-3 text-gray-400" />
                         My Profile
                       </Link>
                       <Link 
                         to="/orders" 
-                        className="block px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                        className="flex items-center px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
                         onClick={() => setIsUserMenuOpen(false)}
                       >
+                        <ShoppingCart className="w-4 h-4 mr-3 text-gray-400" />
                         My Orders
                       </Link>
                       <Link 
                         to="/addresses" 
-                        className="block px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                        className="flex items-center px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
                         onClick={() => setIsUserMenuOpen(false)}
                       >
+                        <MapPin className="w-4 h-4 mr-3 text-gray-400" />
                         My Addresses
                       </Link>
                       <button
                         onClick={handleLogout}
-                        className="block w-full text-left px-4 py-3 text-sm text-red-600 hover:bg-red-50 transition-colors"
+                        className="flex items-center w-full text-left px-4 py-3 text-sm text-red-600 hover:bg-red-50 transition-colors"
                       >
+                        <X className="w-4 h-4 mr-3" />
                         Logout
                       </button>
                     </>
@@ -221,15 +185,60 @@ const Header = ({ onSearchChange }) => {
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
             <input
               type="text"
-              placeholder="Smart Search"
+              placeholder="Search products"
               value={searchQuery}
               onChange={handleSearch}
               className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
             />
           </div>
         </div>
-
       </div>
+
+      {/* Mobile Menu Overlay */}
+      {isMenuOpen && (
+        <div className="md:hidden fixed inset-0 z-50 bg-black bg-opacity-50" onClick={() => setIsMenuOpen(false)}>
+          <div className="fixed right-0 top-0 h-full w-80 bg-white shadow-xl" onClick={(e) => e.stopPropagation()}>
+            <div className="p-4 border-b">
+              <div className="flex items-center justify-between">
+                <h2 className="text-lg font-semibold">Menu</h2>
+                <button onClick={() => setIsMenuOpen(false)}>
+                  <X className="w-6 h-6" />
+                </button>
+              </div>
+            </div>
+            <div className="p-4">
+              {isAuthenticated ? (
+                <div className="space-y-4">
+                  <div className="text-sm text-gray-500 pb-2 border-b">
+                    {user?.email || 'customer@grooso.com'}
+                  </div>
+                  <Link to="/account" className="block py-2 text-gray-700" onClick={() => setIsMenuOpen(false)}>
+                    My Profile
+                  </Link>
+                  <Link to="/orders" className="block py-2 text-gray-700" onClick={() => setIsMenuOpen(false)}>
+                    My Orders
+                  </Link>
+                  <Link to="/addresses" className="block py-2 text-gray-700" onClick={() => setIsMenuOpen(false)}>
+                    My Addresses
+                  </Link>
+                  <button onClick={handleLogout} className="block py-2 text-red-600 w-full text-left">
+                    Logout
+                  </button>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  <Link to="/login" className="block py-2 text-gray-700" onClick={() => setIsMenuOpen(false)}>
+                    Login
+                  </Link>
+                  <Link to="/register" className="block py-2 text-gray-700" onClick={() => setIsMenuOpen(false)}>
+                    Register
+                  </Link>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </header>
   );
 };

@@ -20,6 +20,7 @@ import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
 import OrderSuccessPage from './pages/OrderSuccessPage';
 import OrderTrackingPage from './pages/OrderTrackingPage';
+import AccountPage from './pages/AccountPage';
 import { useAuth } from './hooks/useAuth';
 import LoadingSpinner from './components/common/LoadingSpinner';
 import MobileProfilePage from './components/common/MobileProfilePage';
@@ -231,6 +232,17 @@ function App() {
             <ProtectedRoute>
               <Layout>
                 <AddressesPage />
+              </Layout>
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/account"
+          element={
+            <ProtectedRoute>
+              <Layout>
+                <AccountPage />
               </Layout>
             </ProtectedRoute>
           }
