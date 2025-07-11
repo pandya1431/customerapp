@@ -7,6 +7,8 @@ import { formatCurrency, formatDate } from '../utils/helpers';
 import toast from 'react-hot-toast';
 
 import MobileHeader from '../components/common/MobileHeader'; // file
+
+const OrdersPage = () => {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('all');
@@ -155,6 +157,21 @@ import MobileHeader from '../components/common/MobileHeader'; // file
             aria-label="Go back"
           >
             ←
+          </button>
+          <div className="flex space-x-2">
+            {tabs.map((tab) => (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id)}
+                className={`px-4 py-2 rounded-lg text-sm font-medium ${
+                  activeTab === tab.id
+                    ? 'bg-emerald-600 text-white'
+                    : 'bg-white text-gray-600 hover:bg-gray-50'
+                }`}
+              >
+                {tab.label}
+                {tab.count > 0 && (
+                  <span className="ml-1 text-xs">
                     {tab.count} order{tab.count !== 1 ? 's' : ''}
                   </span>
                 )}
@@ -255,7 +272,7 @@ import MobileHeader from '../components/common/MobileHeader'; // file
         </div>
       </div>
     </div>
-  </>);
+  );
 };
 
 export default OrdersPage;
