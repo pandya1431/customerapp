@@ -155,20 +155,9 @@ const OrdersPage = () => {
             aria-label="Go back"
           >
             ←
-          </button>
-          <div className="flex space-x-2">
-            {tabs.map((tab) => (
-              <button
-                key={tab.id}
-                onClick={() => setActiveTab(tab.id)}
-                className={`flex-1 min-w-0 px-4 py-4 text-sm font-medium transition-all duration-200 ${
-                  activeTab === tab.id ? 'bg-white shadow-sm border-t-2 border-emerald-500' : 'text-gray-500 hover:text-gray-700'
-                }`}
-              >
-                {tab.label}
-                <span className="ml-2 text-gray-400">
-                  {tab.count} order{tab.count !== 1 ? 's' : ''}
-                </span>
+                    {tab.count} order{tab.count !== 1 ? 's' : ''}
+                  </span>
+                )}
               </button>
             ))}
           </div>
@@ -245,12 +234,12 @@ const OrdersPage = () => {
                 <Package className="w-12 h-12 text-gray-400" />
               </div>
               <h3 className="text-lg font-medium text-gray-900 mb-2">
-                {activeTab === 'all' ? 'No orders found' : \`No ${activeTab} orders`}
+                {activeTab === 'all' ? 'No orders found' : `No ${activeTab} orders`}
               </h3>
               <p className="text-gray-500 mb-6">
                 {activeTab === 'all' 
                   ? "You haven't placed any orders yet" 
-                  : \`You don't have any ${activeTab} orders`
+                  : `You don't have any ${activeTab} orders`
                 }
               </p>
               {activeTab === 'all' && (
