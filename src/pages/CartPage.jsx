@@ -1,243 +1,280 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
-import { ShoppingBag, Plus, Minus, Trash2, ArrowLeft, ArrowRight, Tag } from 'lucide-react';
-import { useCart } from '../hooks/useCart';
-import { formatCurrency } from '../utils/helpers';
+import React, { useState, useEffect } from 'react';
+import { Package, Zap, Store, Globe, Eye, Calendar, MapPin } from 'lucide-react';
+import { ordersApi } from '../services/api';
+import LoadingSpinner from '../components/common/LoadingSpinner';
+import MobileHeader from '../components/common/MobileHeader';
+import { useAuth } from '../hooks/useAuth';
+import { formatCurrency, formatDate } from '../utils/helpers';
 import toast from 'react-hot-toast';
 
-const CartPage = () => {
-  const { 
-    cart, 
-    updateQuantity, 
-    removeFromCart, 
-    getCartTotal,
-    getCartSubtotal,
-    getDeliveryFee,
-    getTaxAmount,
-    clearCart 
-  } = useCart();
+const OrdersPage = () => {
+  const [orders, setOrders] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState('all');
+  const { user } = useAuth();
 
-  const handleQuantityChange = (productId, newQuantity) => {
-    if (newQuantity < 1) {
-      removeFromCart(productId);
-      toast.success('Item removed from cart');
-    } else {
-      updateQuantity(productId, newQuantity);
+  // Mock orders data with product images
+  const mockOrders = [
+    {
+      id: 'GRO-12345',
+      orderNumber: 'Order #12345',
+      status: 'delivered',
+      total: 1548,
+      orderType: 'express',
+      createdAt: '2024-04-15T11:31:00Z',
+      vendor: 'Express',
+      items: [
+        { name: 'Green Bottle', image: 'https://images.pexels.com/photos/4465124/pexels-photo-4465124.jpeg?auto=compress&cs=tinysrgb&w=100' },
+        { name: 'Headphones', image: 'https://images.pexels.com/photos/3394650/pexels-photo-3394650.jpeg?auto=compress&cs=tinysrgb&w=100' },
+        { name: 'T-shirt', image: 'https://images.pexels.com/photos/1020585/pexels-photo-1020585.jpeg?auto=compress&cs=tinysrgb&w=100' }
+      ],
+      customer: { email: 'customer@grooso.com' }
+    },
+    {
+      id: 'GRO-12344',
+      orderNumber: 'Order #12344',
+      status: 'pending',
+      total: 750,
+      orderType: 'citymart',
+      createdAt: '2024-04-12T09:20:00Z',
+      vendor: 'City Mart',
+      items: [
+        { name: 'Apple', image: 'https://images.pexels.com/photos/102104/pexels-photo-102104.jpeg?auto=compress&cs=tinysrgb&w=100' },
+        { name: 'Banana', image: 'https://images.pexels.com/photos/61127/pexels-photo-61127.jpeg?auto=compress&cs=tinysrgb&w=100' },
+        { name: 'Bread', image: 'https://images.pexels.com/photos/209206/pexels-photo-209206.jpeg?auto=compress&cs=tinysrgb&w=100' }
+      ],
+      customer: { email: 'customer@grooso.com' }
+    },
+    {
+      id: 'GRO-12343',
+      orderNumber: 'Order #12343',
+      status: 'delivered',
+      total: 2340,
+      orderType: 'nationwide',
+      createdAt: '2024-04-10T16:10:00Z',
+      vendor: 'Nationwide',
+      items: [
+        { name: 'Red Sofa', image: 'https://images.pexels.com/photos/1112598/pexels-photo-1112598.jpeg?auto=compress&cs=tinysrgb&w=100' },
+        { name: 'Sneakers', image: 'https://images.pexels.com/photos/2529148/pexels-photo-2529148.jpeg?auto=compress&cs=tinysrgb&w=100' },
+        { name: 'Watch', image: 'https://images.pexels.com/photos/393047/pexels-photo-393047.jpeg?auto=compress&cs=tinysrgb&w=100' }
+      ],
+      customer: { email: 'customer@grooso.com' }
+    },
+    {
+      id: 'GRO-12342',
+      orderNumber: 'Order #12342',
+      status: 'cancelled',
+      total: 899,
+      orderType: 'express',
+      createdAt: '2024-04-08T14:25:00Z',
+      vendor: 'Express',
+      items: [
+        { name: 'Pizza', image: 'https://images.pexels.com/photos/315755/pexels-photo-315755.jpeg?auto=compress&cs=tinysrgb&w=100' },
+        { name: 'Burger', image: 'https://images.pexels.com/photos/1639557/pexels-photo-1639557.jpeg?auto=compress&cs=tinysrgb&w=100' },
+        { name: 'Fries', image: 'https://images.pexels.com/photos/1893556/pexels-photo-1893556.jpeg?auto=compress&cs=tinysrgb&w=100' }
+      ],
+      customer: { email: 'customer@grooso.com' }
+    }
+  ];
+
+  useEffect(() => {
+    fetchOrders();
+  }, []);
+
+  const fetchOrders = async () => {
+    try {
+      // Using mock data for demonstration
+      const userOrders = mockOrders.filter(order => 
+        order.customer.email === user?.email
+      );
+      setOrders(userOrders);
+    } catch (error) {
+      console.error('Error fetching orders:', error);
+    } finally {
+      setLoading(false);
     }
   };
 
-  const handleRemoveItem = (productId, productName) => {
-    removeFromCart(productId);
-    toast.success(`${productName} removed from cart`);
+  const getFilteredOrders = () => {
+    if (activeTab === 'all') return orders;
+    return orders.filter(order => order.status === activeTab);
   };
 
-  const subtotal = getCartSubtotal();
-  const deliveryFee = getDeliveryFee();
-  const tax = getTaxAmount();
-  const total = getCartTotal();
+  const getStatusColor = (status) => {
+    const colors = {
+      pending: 'bg-yellow-100 text-yellow-800',
+      delivered: 'bg-green-100 text-green-800',
+      cancelled: 'bg-red-100 text-red-800',
+      confirmed: 'bg-blue-100 text-blue-800'
+    };
+    return colors[status] || 'bg-gray-100 text-gray-800';
+  };
 
-  if (cart.length === 0) {
+  const getVendorIcon = (orderType) => {
+    switch (orderType) {
+      case 'express':
+        return <Zap className="w-4 h-4 text-emerald-600" />;
+      case 'citymart':
+        return <Store className="w-4 h-4 text-emerald-600" />;
+      case 'nationwide':
+        return <Globe className="w-4 h-4 text-emerald-600" />;
+      default:
+        return <Package className="w-4 h-4 text-emerald-600" />;
+    }
+  };
+
+  const handleViewDetails = (orderId) => {
+    toast.success(`Opening details for ${orderId}`);
+    // Navigate to order details page
+  };
+
+  const tabs = [
+    { id: 'all', label: 'All', count: orders.length },
+    { id: 'pending', label: 'Pending', count: orders.filter(o => o.status === 'pending').length },
+    { id: 'delivered', label: 'Delivered', count: orders.filter(o => o.status === 'delivered').length },
+    { id: 'cancelled', label: 'Cancelled', count: orders.filter(o => o.status === 'cancelled').length }
+  ];
+
+  const filteredOrders = getFilteredOrders();
+
+  if (loading) {
     return (
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-        <div className="text-center">
-          <ShoppingBag className="w-24 h-24 text-gray-300 mx-auto mb-6" />
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">Your cart is empty</h2>
-          <p className="text-gray-600 mb-8">Looks like you haven't added anything to your cart yet.</p>
-          <Link
-            to="/"
-            className="inline-flex items-center space-x-2 bg-emerald-600 text-white px-6 py-3 rounded-lg hover:bg-emerald-700 transition-colors"
-          >
-            <ArrowLeft className="w-4 h-4" />
-            <span>Continue Shopping</span>
-          </Link>
-        </div>
+      <div className="flex justify-center items-center h-64">
+        <LoadingSpinner text="Loading your orders..." />
       </div>
     );
   }
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      {/* Header */}
-      <div className="flex items-center justify-between mb-8">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900">Shopping Cart</h1>
-          <p className="text-gray-600 mt-1">{cart.length} item{cart.length !== 1 ? 's' : ''} in your cart</p>
+    <div className="min-h-screen bg-gray-50">
+      <MobileHeader title="My Orders" />
+      
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Header */}
+        <div className="mb-8 hidden md:block">
+          <h1 className="text-2xl md:text-3xl font-bold text-gray-900">My Orders</h1>
+          <p className="text-gray-600 mt-1">Track and manage your orders</p>
         </div>
-        <Link
-          to="/"
-          className="flex items-center space-x-2 text-emerald-600 hover:text-emerald-700"
-        >
-          <ArrowLeft className="w-4 h-4" />
-          <span>Continue Shopping</span>
-        </Link>
-      </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        {/* Cart Items */}
-        <div className="lg:col-span-2">
-          <div className="bg-white rounded-lg shadow-sm border">
-            <div className="p-6 border-b">
-              <div className="flex items-center justify-between">
-                <h2 className="text-lg font-semibold">Cart Items</h2>
-                <button
-                  onClick={() => {
-                    clearCart();
-                    toast.success('Cart cleared');
-                  }}
-                  className="text-red-600 hover:text-red-700 text-sm font-medium"
-                >
-                  Clear Cart
-                </button>
-              </div>
-            </div>
+        {/* Tab Filters */}
+        <div className="bg-white rounded-lg shadow-sm border mb-6 overflow-hidden">
+          <div className="flex overflow-x-auto">
+            {tabs.map((tab) => (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id)}
+                className={`flex-1 min-w-0 px-4 py-4 text-sm font-medium transition-all duration-200 ${
+                  activeTab === tab.id
+                    ? 'bg-emerald-600 text-white'
+                    : 'text-gray-600 hover:text-emerald-600 hover:bg-emerald-50'
+                }`}
+              >
+                <span className="block">{tab.label}</span>
+                {tab.count > 0 && (
+                  <span className={`text-xs mt-1 block ${
+                    activeTab === tab.id ? 'text-emerald-100' : 'text-gray-400'
+                  }`}>
+                    {tab.count} order{tab.count !== 1 ? 's' : ''}
+                  </span>
+                )}
+              </button>
+            ))}
+          </div>
+        </div>
 
-            <div className="divide-y divide-gray-200">
-              {cart.map((item) => (
-                <div key={item.id} className="p-6">
-                  <div className="flex items-start space-x-4">
-                    <img
-                      src={item.image}
-                      alt={item.name}
-                      className="w-20 h-20 object-cover rounded-lg"
-                    />
-                    
-                    <div className="flex-1">
-                      <div className="flex items-start justify-between">
-                        <div>
-                          <h3 className="text-lg font-medium text-gray-900">{item.name}</h3>
-                          <p className="text-sm text-gray-600 mt-1">{item.vendor}</p>
-                          <p className="text-sm text-gray-500 mt-1">{item.category}</p>
-                        </div>
-                        <button
-                          onClick={() => handleRemoveItem(item.id, item.name)}
-                          className="text-red-500 hover:text-red-700 p-1"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </button>
-                      </div>
-
-                      <div className="flex items-center justify-between mt-4">
-                        <div className="flex items-center space-x-3">
-                          <button
-                            onClick={() => handleQuantityChange(item.id, item.quantity - 1)}
-                            className="p-1 rounded-full border border-gray-300 hover:bg-gray-50"
-                          >
-                            <Minus className="w-4 h-4" />
-                          </button>
-                          <span className="font-medium w-8 text-center">{item.quantity}</span>
-                          <button
-                            onClick={() => handleQuantityChange(item.id, item.quantity + 1)}
-                            className="p-1 rounded-full border border-gray-300 hover:bg-gray-50"
-                          >
-                            <Plus className="w-4 h-4" />
-                          </button>
-                        </div>
-
-                        <div className="text-right">
-                          <div className="text-lg font-semibold text-gray-900">
-                            {formatCurrency(item.price * item.quantity)}
-                          </div>
-                          {item.originalPrice && item.originalPrice > item.price && (
-                            <div className="text-sm text-gray-500 line-through">
-                              {formatCurrency(item.originalPrice * item.quantity)}
-                            </div>
-                          )}
-                        </div>
+        {/* Orders List */}
+        <div className="space-y-4">
+          {filteredOrders.length > 0 ? (
+            filteredOrders.map((order) => (
+              <div key={order.id} className="bg-white rounded-lg shadow-sm border p-6 hover:shadow-md transition-shadow">
+                {/* Order Header */}
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-4">
+                  <div className="flex items-center space-x-3 mb-2 sm:mb-0">
+                    <div className="w-10 h-10 bg-emerald-100 rounded-lg flex items-center justify-center">
+                      {getVendorIcon(order.orderType)}
+                    </div>
+                    <div>
+                      <h3 className="font-semibold text-lg text-gray-900">{order.orderNumber}</h3>
+                      <div className="flex items-center space-x-2 text-sm text-gray-600">
+                        <Calendar className="w-3 h-3" />
+                        <span>{formatDate(order.createdAt)}</span>
                       </div>
                     </div>
                   </div>
+                  <span className={`inline-flex px-3 py-1 rounded-full text-sm font-medium capitalize ${getStatusColor(order.status)}`}>
+                    {order.status}
+                  </span>
                 </div>
-              ))}
-            </div>
-          </div>
 
-          {/* Coupon Section */}
-          <div className="bg-white rounded-lg shadow-sm border mt-6 p-6">
-            <div className="flex items-center space-x-3">
-              <Tag className="w-5 h-5 text-emerald-600" />
-              <h3 className="text-lg font-semibold">Apply Coupon</h3>
-            </div>
-            <div className="flex space-x-3 mt-4">
-              <input
-                type="text"
-                placeholder="Enter coupon code"
-                className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
-              />
-              <button className="bg-emerald-600 text-white px-6 py-2 rounded-lg hover:bg-emerald-700 transition-colors">
-                Apply
-              </button>
-            </div>
-          </div>
-        </div>
+                {/* Vendor Info */}
+                <div className="flex items-center space-x-2 mb-4">
+                  {getVendorIcon(order.orderType)}
+                  <span className="font-medium text-gray-900">{order.vendor}</span>
+                </div>
 
-        {/* Order Summary */}
-        <div className="lg:col-span-1">
-          <div className="bg-white rounded-lg shadow-sm border p-6 sticky top-4">
-            <h2 className="text-lg font-semibold mb-4">Order Summary</h2>
-            
-            <div className="space-y-3">
-              <div className="flex justify-between">
-                <span className="text-gray-600">Subtotal ({cart.length} items)</span>
-                <span className="font-medium">{formatCurrency(subtotal)}</span>
-              </div>
-              
-              <div className="flex justify-between">
-                <span className="text-gray-600">Delivery Fee</span>
-                <span className="font-medium">
-                  {deliveryFee === 0 ? (
-                    <span className="text-emerald-600">FREE</span>
-                  ) : (
-                    formatCurrency(deliveryFee)
+                {/* Product Images */}
+                <div className="flex items-center space-x-3 mb-4">
+                  {order.items.slice(0, 3).map((item, index) => (
+                    <img
+                      key={index}
+                      src={item.image}
+                      alt={item.name}
+                      className="w-12 h-12 object-cover rounded-lg border border-gray-200"
+                    />
+                  ))}
+                  {order.items.length > 3 && (
+                    <div className="w-12 h-12 bg-gray-100 rounded-lg border border-gray-200 flex items-center justify-center">
+                      <span className="text-xs text-gray-600">+{order.items.length - 3}</span>
+                    </div>
                   )}
-                </span>
-              </div>
-              
-              <div className="flex justify-between">
-                <span className="text-gray-600">Taxes & Fees</span>
-                <span className="font-medium">{formatCurrency(tax)}</span>
-              </div>
-              
-              <div className="border-t pt-3">
-                <div className="flex justify-between">
-                  <span className="text-lg font-semibold">Total</span>
-                  <span className="text-lg font-bold text-emerald-600">{formatCurrency(total)}</span>
+                </div>
+
+                {/* Order Footer */}
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between pt-4 border-t border-gray-100">
+                  <div className="mb-3 sm:mb-0">
+                    <span className="text-2xl font-bold text-gray-900">
+                      {formatCurrency(order.total)}
+                    </span>
+                  </div>
+                  <button
+                    onClick={() => handleViewDetails(order.orderNumber)}
+                    className="flex items-center space-x-2 bg-white border border-gray-300 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-50 transition-colors"
+                  >
+                    <Eye className="w-4 h-4" />
+                    <span>View Details</span>
+                  </button>
                 </div>
               </div>
-            </div>
-
-            {/* Delivery Info */}
-            <div className="mt-6 p-4 bg-emerald-50 rounded-lg">
-              <div className="text-sm">
-                <div className="font-medium text-emerald-800 mb-1">Free Delivery</div>
-                <div className="text-emerald-700">
-                  {deliveryFee === 0 ? 
-                    'Congratulations! You qualify for free delivery.' :
-                    `Add ${formatCurrency(999 - subtotal)} more for free delivery.`
-                  }
-                </div>
+            ))
+          ) : (
+            /* Empty State */
+            <div className="text-center py-12">
+              <div className="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Package className="w-12 h-12 text-gray-400" />
               </div>
+              <h3 className="text-lg font-medium text-gray-900 mb-2">
+                {activeTab === 'all' ? 'No orders found' : `No ${activeTab} orders`}
+              </h3>
+              <p className="text-gray-500 mb-6">
+                {activeTab === 'all' 
+                  ? "You haven't placed any orders yet" 
+                  : `You don't have any ${activeTab} orders`
+                }
+              </p>
+              {activeTab === 'all' && (
+                <a
+                  href="/"
+                  className="inline-flex items-center space-x-2 bg-emerald-600 text-white px-6 py-3 rounded-lg hover:bg-emerald-700 transition-colors"
+                >
+                  <span>Start Shopping</span>
+                </a>
+              )}
             </div>
-
-            {/* Checkout Button */}
-            <Link
-              to="/checkout"
-              className="w-full bg-emerald-600 text-white py-3 px-4 rounded-lg font-medium hover:bg-emerald-700 transition-colors flex items-center justify-center space-x-2 mt-6"
-            >
-              <span>Proceed to Checkout</span>
-              <ArrowRight className="w-4 h-4" />
-            </Link>
-
-            {/* Security Info */}
-            <div className="mt-4 text-center">
-              <div className="text-xs text-gray-500">
-                🔒 Secure checkout with 256-bit SSL encryption
-              </div>
-            </div>
-          </div>
+          )}
         </div>
       </div>
     </div>
   );
 };
 
-export default CartPage;
+export default OrdersPage;

@@ -148,31 +148,15 @@ const OrdersPage = () => {
     <div className="min-h-screen bg-gray-50">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Mobile Back Arrow - Only visible on mobile */}
-        <div className="md:hidden mb-4">
+        <div className="md:hidden mb-6 flex items-center space-x-3">
           <button
             onClick={() => window.history.back()}
-            className="flex items-center space-x-2 text-gray-600 hover:text-emerald-600 transition-colors p-2 -ml-2 touch-manipulation"
+            className="text-gray-800 hover:text-emerald-600 transition-colors p-2 touch-manipulation text-2xl"
             aria-label="Go back"
           >
-            <svg 
-              className="w-6 h-6" 
-              fill="none" 
-              stroke="currentColor" 
-              viewBox="0 0 24 24"
-            >
-              <path 
-                strokeLinecap="round" 
-                strokeLinejoin="round" 
-                strokeWidth={2} 
-                d="M15 19l-7-7 7-7" 
-              />
-            </svg>
-            <span className="text-sm font-medium">Back</span>
-          </button>
-        </div>
-
+            ←
         {/* Header */}
-        <div className="mb-8">
+        <div className="mb-8 hidden md:block">
           <h1 className="text-2xl md:text-3xl font-bold text-gray-900">My Orders</h1>
           <p className="text-gray-600 mt-1">Track and manage your orders</p>
         </div>
