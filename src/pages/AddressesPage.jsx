@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { MapPin, Plus, Edit, Trash2, Home, Briefcase, MapIcon } from 'lucide-react';
+import { MapPin, Plus, Edit, Trash2, Home, Briefcase, MapIcon, X } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 const AddressesPage = () => {
