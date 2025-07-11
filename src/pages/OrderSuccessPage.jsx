@@ -141,7 +141,7 @@ const OrdersPage = () => {
       <div className="flex justify-center items-center h-64">
         <LoadingSpinner text="Loading your orders..." />
       </div>
-import MobileHeader from '../components/common/MobileHeader'; // file
+    );
   }
 
   return (
@@ -278,7 +278,7 @@ import MobileHeader from '../components/common/MobileHeader'; // file
         </div>
       </div>
     </div>
-  </>);
+  );
 };
 
 export default OrdersPage;
