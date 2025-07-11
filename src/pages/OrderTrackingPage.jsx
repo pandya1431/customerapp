@@ -6,7 +6,7 @@ import { useAuth } from '../hooks/useAuth';
 import { formatCurrency, formatDate } from '../utils/helpers';
 import toast from 'react-hot-toast';
 
-const OrdersPage = () => {
+import MobileHeader from '../components/common/MobileHeader'; // file
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('all');
@@ -255,7 +255,7 @@ const OrdersPage = () => {
         </div>
       </div>
     </div>
-  );
+  </>);
 };
 
 export default OrdersPage;
