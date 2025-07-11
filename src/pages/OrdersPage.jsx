@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Package, Zap, Store, Globe, Eye, Calendar, MapPin } from 'lucide-react';
+import { Package, Zap, Store, Globe, Eye, Calendar, MapPin, User } from 'lucide-react';
 import { ordersApi } from '../services/api';
 import LoadingSpinner from '../components/common/LoadingSpinner';
 import { useAuth } from '../hooks/useAuth';
@@ -102,7 +102,7 @@ const OrdersPage = () => {
   const getStatusColor = (status) => {
     const colors = {
       pending: 'bg-yellow-100 text-yellow-800',
-      delivered: 'bg-green-100 text-green-800',
+      delivered: 'bg-emerald-600 text-white',
       cancelled: 'bg-red-100 text-red-800',
       confirmed: 'bg-blue-100 text-blue-800'
     };
@@ -112,13 +112,13 @@ const OrdersPage = () => {
   const getVendorIcon = (orderType) => {
     switch (orderType) {
       case 'express':
-        return <Zap className="w-4 h-4 text-emerald-600" />;
+        return <Zap className="w-5 h-5 text-emerald-600" />;
       case 'citymart':
-        return <Store className="w-4 h-4 text-emerald-600" />;
+        return <Store className="w-5 h-5 text-emerald-600" />;
       case 'nationwide':
-        return <Globe className="w-4 h-4 text-emerald-600" />;
+        return <Globe className="w-5 h-5 text-emerald-600" />;
       default:
-        return <Package className="w-4 h-4 text-emerald-600" />;
+        return <Package className="w-5 h-5 text-emerald-600" />;
     }
   };
 
@@ -128,10 +128,10 @@ const OrdersPage = () => {
   };
 
   const tabs = [
-    { id: 'all', label: 'All', count: orders.length },
-    { id: 'pending', label: 'Pending', count: orders.filter(o => o.status === 'pending').length },
-    { id: 'delivered', label: 'Delivered', count: orders.filter(o => o.status === 'delivered').length },
-    { id: 'cancelled', label: 'Cancelled', count: orders.filter(o => o.status === 'cancelled').length }
+    { id: 'all', label: 'All' },
+    { id: 'pending', label: 'Pending' },
+    { id: 'delivered', label: 'Delivered' },
+    { id: 'cancelled', label: 'Cancelled' }
   ];
 
   const filteredOrders = getFilteredOrders();
@@ -146,110 +146,98 @@ const OrdersPage = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Mobile Back Arrow - Only visible on mobile */}
-        <div className="md:hidden mb-6 flex items-center space-x-3">
-          <button
-            onClick={() => window.history.back()}
-            className="text-gray-800 hover:text-emerald-600 transition-colors p-2 touch-manipulation text-2xl"
-            aria-label="Go back"
-          >
-            ←
-          </button>
-          <span className="text-xl font-bold text-gray-900">Grooso</span>
+      {/* Mobile Header */}
+      <div className="bg-white px-4 py-4">
+        <div className="flex items-center justify-between mb-6">
+          <h1 className="text-2xl font-bold text-emerald-600">Grooso</h1>
+          <User className="w-6 h-6 text-gray-600" />
         </div>
-
-        {/* Page Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">My Orders</h1>
-          <p className="text-gray-600">Track and manage your orders</p>
-        </div>
-
+        
+        <h2 className="text-2xl font-bold text-gray-900 mb-6">My Orders</h2>
+        
         {/* Tabs */}
-        <div className="border-b border-gray-200 mb-6">
-          <nav className="-mb-px flex space-x-8">
-            {tabs.map((tab) => (
-              <button
-                key={tab.id}
-                onClick={() => setActiveTab(tab.id)}
-                className={`py-2 px-1 border-b-2 font-medium text-sm ${
-                  activeTab === tab.id
-                    ? 'border-emerald-500 text-emerald-600'
-                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                }`}
-              >
-                {tab.label}
-                {tab.count > 0 && (
-                  <span className="ml-2 bg-gray-100 text-gray-900 py-0.5 px-2 rounded-full text-xs">
-                    {tab.count}
-                  </span>
-                )}
-              </button>
-            ))}
-          </nav>
+        <div className="flex space-x-1">
+          {tabs.map((tab) => (
+            <button
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id)}
+              className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
+                activeTab === tab.id
+                  ? 'bg-emerald-600 text-white'
+                  : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+              }`}
+            >
+              {tab.label}
+            </button>
+          ))}
         </div>
+      </div>
 
-        {/* Orders List */}
-        <div className="space-y-6">
+      {/* Orders List */}
+      <div className="px-4 pb-20">
+        <div className="space-y-4">
           {filteredOrders.length > 0 ? (
             filteredOrders.map((order) => (
-              <div key={order.id} className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+              <div key={order.id} className="bg-white rounded-lg p-4 shadow-sm">
                 {/* Order Header */}
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-4">
-                  <div className="flex items-center space-x-3 mb-2 sm:mb-0">
-                    <div className="w-10 h-10 bg-emerald-100 rounded-lg flex items-center justify-center">
+                <div className="flex items-start justify-between mb-3">
+                  <div className="flex items-center space-x-3">
+                    <div className="w-8 h-8 bg-emerald-100 rounded-lg flex items-center justify-center">
                       {getVendorIcon(order.orderType)}
                     </div>
                     <div>
-                      <h3 className="font-semibold text-lg text-gray-900">{order.orderNumber}</h3>
-                      <div className="flex items-center space-x-2 text-sm text-gray-600">
-                        <Calendar className="w-3 h-3" />
-                        <span>{formatDate(order.createdAt)}</span>
-                      </div>
+                      <h3 className="font-semibold text-gray-900">{order.orderNumber}</h3>
+                      <p className="text-sm text-gray-500">
+                        {new Date(order.createdAt).toLocaleDateString('en-US', {
+                          month: 'short',
+                          day: 'numeric',
+                          year: 'numeric'
+                        })} • {new Date(order.createdAt).toLocaleTimeString('en-US', {
+                          hour: 'numeric',
+                          minute: '2-digit',
+                          hour12: true
+                        })}
+                      </p>
                     </div>
                   </div>
-                  <span className={`inline-flex px-3 py-1 rounded-full text-sm font-medium capitalize ${getStatusColor(order.status)}`}>
-                    {order.status}
+                  <span className={`px-3 py-1 rounded-full text-sm font-medium ${getStatusColor(order.status)}`}>
+                    {order.status === 'delivered' ? 'Delivered' : 
+                     order.status === 'pending' ? 'Pending' : 
+                     order.status.charAt(0).toUpperCase() + order.status.slice(1)}
                   </span>
                 </div>
 
                 {/* Vendor Info */}
-                <div className="flex items-center space-x-2 mb-4">
-                  {getVendorIcon(order.orderType)}
+                <div className="flex items-center space-x-2 mb-3">
+                  <div className="w-4 h-4 bg-emerald-600 rounded-full flex items-center justify-center">
+                    <div className="w-2 h-2 bg-white rounded-full"></div>
+                  </div>
                   <span className="font-medium text-gray-900">{order.vendor}</span>
                 </div>
 
                 {/* Product Images */}
-                <div className="flex items-center space-x-3 mb-4">
-                  {order.items.slice(0, 3).map((item, index) => (
-                    <img
-                      key={index}
-                      src={item.image}
-                      alt={item.name}
-                      className="w-12 h-12 object-cover rounded-lg border border-gray-200"
-                    />
-                  ))}
-                  {order.items.length > 3 && (
-                    <div className="w-12 h-12 bg-gray-100 rounded-lg border border-gray-200 flex items-center justify-center">
-                      <span className="text-xs text-gray-600">+{order.items.length - 3}</span>
-                    </div>
-                  )}
-                </div>
-
-                {/* Order Footer */}
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between pt-4 border-t border-gray-100">
-                  <div className="mb-3 sm:mb-0">
-                    <span className="text-2xl font-bold text-gray-900">
-                      {formatCurrency(order.total)}
-                    </span>
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center space-x-3">
+                    {order.items.slice(0, 3).map((item, index) => (
+                      <img
+                        key={index}
+                        src={item.image}
+                        alt={item.name}
+                        className="w-12 h-12 object-cover rounded-lg"
+                      />
+                    ))}
                   </div>
-                  <button
-                    onClick={() => handleViewDetails(order.orderNumber)}
-                    className="flex items-center space-x-2 bg-white border border-gray-300 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-50 transition-colors"
-                  >
-                    <Eye className="w-4 h-4" />
-                    <span>View Details</span>
-                  </button>
+                  <div className="text-right">
+                    <div className="text-xl font-bold text-gray-900 mb-2">
+                      {formatCurrency(order.total)}
+                    </div>
+                    <button
+                      onClick={() => handleViewDetails(order.orderNumber)}
+                      className="border border-gray-300 text-gray-700 px-4 py-2 rounded-lg text-sm font-medium hover:bg-gray-50 transition-colors"
+                    >
+                      View Details
+                    </button>
+                  </div>
                 </div>
               </div>
             ))
