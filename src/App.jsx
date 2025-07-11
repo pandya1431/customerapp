@@ -22,6 +22,7 @@ import OrderSuccessPage from './pages/OrderSuccessPage';
 import OrderTrackingPage from './pages/OrderTrackingPage';
 import { useAuth } from './hooks/useAuth';
 import LoadingSpinner from './components/common/LoadingSpinner';
+import MobileProfilePage from './components/common/MobileProfilePage';
 
 // Protected Route Component
 const ProtectedRoute = ({ children }) => {
@@ -90,6 +91,16 @@ function App() {
         {/* Public Routes */}
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
+        
+        {/* Mobile Profile Page */}
+        <Route
+          path="/profile-mobile"
+          element={
+            <div className="md:hidden">
+              <MobileProfilePage />
+            </div>
+          }
+        />
         
         {/* Search and Categories */}
         <Route

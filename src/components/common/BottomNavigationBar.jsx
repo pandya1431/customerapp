@@ -2,10 +2,12 @@ import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Home, Search, Grid3X3, ShoppingCart, User } from 'lucide-react';
 import { useCart } from '../../hooks/useCart';
+import { useAuth } from '../../hooks/useAuth';
 
 const BottomNavigationBar = () => {
   const location = useLocation();
   const { getCartItemsCount } = useCart();
+  const { isAuthenticated } = useAuth();
 
   const navItems = [
     {
@@ -36,7 +38,7 @@ const BottomNavigationBar = () => {
     {
       name: 'Profile',
       icon: User,
-      path: '/profile',
+      path: isAuthenticated ? '/profile-mobile' : '/login',
       active: location.pathname === '/profile'
     }
   ];

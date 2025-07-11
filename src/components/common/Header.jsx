@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ShoppingCart, User, Search, Menu, X, Heart, MapPin } from 'lucide-react';
+import { ShoppingCart, User, Search, Menu, X, Heart, MapPin, ChevronDown } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
 import { useCart } from '../../hooks/useCart';
@@ -94,48 +94,91 @@ const Header = ({ onSearchChange }) => {
             <div className="relative">
               <button
                 onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
-                className="flex items-center space-x-2 text-gray-600 hover:text-emerald-600 transition-colors"
+                className="hidden md:flex items-center space-x-2 text-gray-600 hover:text-emerald-600 transition-colors"
               >
                 <User className="w-6 h-6" />
                 {isAuthenticated && (
-                  <span className="hidden md:block text-sm font-medium">
+                  <>
+                    <span className="text-sm font-medium">
                     {user?.name?.split(' ')[0]}
-                  </span>
+                    </span>
+                    <ChevronDown className="w-4 h-4" />
+                  </>
                 )}
               </button>
 
               {/* User Dropdown Menu */}
-              {isUserMenuOpen && (
-                <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-50 border">
+              {isUserMenuOpen && isAuthenticated && (
+                <div className="absolute right-0 mt-2 w-64 bg-white rounded-lg shadow-xl py-2 z-50 border border-gray-100">
+                  <div className="px-4 py-3 text-sm text-gray-500 border-b border-gray-100">
+                    {user?.email}
+                  </div>
+                  <Link 
+                    to="/profile" 
+                    className="flex items-center px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                    onClick={() => setIsUserMenuOpen(false)}
+                  >
+                    <User className="w-4 h-4 mr-3 text-gray-400" />
+                    My Profile
+                  </Link>
+                  <Link 
+                    to="/orders" 
+                    className="flex items-center px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                    onClick={() => setIsUserMenuOpen(false)}
+                  >
+                    <ShoppingCart className="w-4 h-4 mr-3 text-gray-400" />
+                    My Orders
+                  </Link>
+                  <Link 
+                    to="/addresses" 
+                    className="flex items-center px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                    onClick={() => setIsUserMenuOpen(false)}
+                  >
+                    <MapPin className="w-4 h-4 mr-3 text-gray-400" />
+                    My Addresses
+                  </Link>
+                  <button
+                    onClick={handleLogout}
+                    className="flex items-center w-full text-left px-4 py-3 text-sm text-red-600 hover:bg-red-50 transition-colors"
+                  >
+                    <X className="w-4 h-4 mr-3" />
+                    Logout
+                  </button>
+                </div>
+              )}
+
+              {/* Login/Register for non-authenticated users */}
+              {isUserMenuOpen && !isAuthenticated && (
+                <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-xl py-2 z-50 border border-gray-100">
                   {isAuthenticated ? (
                     <>
-                      <div className="px-4 py-2 text-sm text-gray-500 border-b">
+                      <div className="px-4 py-3 text-sm text-gray-500 border-b border-gray-100">
                         {user?.email}
                       </div>
                       <Link 
                         to="/profile" 
-                        className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
+                        className="block px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
                         onClick={() => setIsUserMenuOpen(false)}
                       >
                         My Profile
                       </Link>
                       <Link 
                         to="/orders" 
-                        className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
+                        className="block px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
                         onClick={() => setIsUserMenuOpen(false)}
                       >
                         My Orders
                       </Link>
                       <Link 
                         to="/addresses" 
-                        className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
+                        className="block px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
                         onClick={() => setIsUserMenuOpen(false)}
                       >
                         My Addresses
                       </Link>
                       <button
                         onClick={handleLogout}
-                        className="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-50"
+                        className="block w-full text-left px-4 py-3 text-sm text-red-600 hover:bg-red-50 transition-colors"
                       >
                         Logout
                       </button>
@@ -144,14 +187,14 @@ const Header = ({ onSearchChange }) => {
                     <>
                       <Link 
                         to="/login" 
-                        className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
+                        className="block px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
                         onClick={() => setIsUserMenuOpen(false)}
                       >
                         Login
                       </Link>
                       <Link 
                         to="/register" 
-                        className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
+                        className="block px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
                         onClick={() => setIsUserMenuOpen(false)}
                       >
                         Register
