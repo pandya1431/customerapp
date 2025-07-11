@@ -155,6 +155,20 @@ const OrdersPage = () => {
             aria-label="Go back"
           >
             ←
+                    {tab.count} order{tab.count !== 1 ? 's' : ''}
+                  </span>
+                )}
+              </button>
+          </button>
+          <span className="text-emerald-600 text-2xl font-bold">Grooso</span>
+          <h1 className="text-xl font-semibold text-gray-900">My Orders</h1>
+        </div>
+
+        {/* Desktop Tabs */}
+        <div className="hidden md:block mb-8">
+          <div className="flex space-x-2">
+            {tabs.map((tab) => (
+              <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
                 className={`flex-1 min-w-0 px-4 py-4 text-sm font-medium transition-all duration-200 ${
@@ -173,6 +187,7 @@ const OrdersPage = () => {
                 )}
               </button>
             ))}
+          </div>
           </div>
         </div>
 

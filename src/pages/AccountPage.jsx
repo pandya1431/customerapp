@@ -155,15 +155,6 @@ const OrdersPage = () => {
             aria-label="Go back"
           >
             ←
-                key={tab.id}
-                onClick={() => setActiveTab(tab.id)}
-                className={`flex-1 min-w-0 px-4 py-4 text-sm font-medium transition-all duration-200 ${
-                  activeTab === tab.id
-                    ? 'bg-emerald-600 text-white'
-                    : 'text-gray-600 hover:text-emerald-600 hover:bg-emerald-50'
-                }`}
-              >
-                <span className="block">{tab.label}</span>
                 {tab.count > 0 && (
                   <span className={`text-xs mt-1 block ${
                     activeTab === tab.id ? 'text-emerald-100' : 'text-gray-400'
@@ -174,6 +165,8 @@ const OrdersPage = () => {
               </button>
             ))}
           </div>
+        </div>
+        </div>
 
         {/* Orders List */}
         <div className="space-y-4">
