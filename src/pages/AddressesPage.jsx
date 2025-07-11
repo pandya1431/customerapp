@@ -155,17 +155,42 @@ const OrdersPage = () => {
             aria-label="Go back"
           >
             ←
-                {tab.count > 0 && (
-                  <span className={`text-xs mt-1 block ${
-                    activeTab === tab.id ? 'text-emerald-100' : 'text-gray-400'
-                  }`}>
-                    {tab.count} order{tab.count !== 1 ? 's' : ''}
-                  </span>
-                )}
+          </button>
+          <h1 className="text-2xl font-bold text-gray-900">My Orders</h1>
+        </div>
+
+        {/* Desktop Header */}
+        <div className="hidden md:block mb-8">
+          <h1 className="text-3xl font-bold text-gray-900">My Orders</h1>
+          <p className="text-gray-600 mt-2">Track and manage your orders</p>
+        </div>
+
+        {/* Tabs */}
+        <div className="mb-6">
+          <div className="flex space-x-1 bg-gray-100 p-1 rounded-lg overflow-x-auto">
+            {tabs.map((tab) => (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id)}
+                className={`flex-1 min-w-0 px-4 py-3 text-sm font-medium rounded-md transition-colors whitespace-nowrap ${
+                  activeTab === tab.id
+                    ? 'bg-emerald-600 text-white shadow-sm'
+                    : 'text-gray-600 hover:text-gray-900 hover:bg-white'
+                }`}
+              >
+                <div className="flex flex-col items-center">
+                  <span>{tab.label}</span>
+                  {tab.count > 0 && (
+                    <span className={`text-xs mt-1 block ${
+                      activeTab === tab.id ? 'text-emerald-100' : 'text-gray-400'
+                    }`}>
+                      {tab.count} order{tab.count !== 1 ? 's' : ''}
+                    </span>
+                  )}
+                </div>
               </button>
             ))}
           </div>
-        </div>
         </div>
 
         {/* Orders List */}
