@@ -141,7 +141,7 @@ const OrdersPage = () => {
       <div className="flex justify-center items-center h-64">
         <LoadingSpinner text="Loading your orders..." />
       </div>
-import MobileHeader from '../components/common/MobileHeader'; // file
+    );
   }
 
   return (
@@ -155,17 +155,27 @@ import MobileHeader from '../components/common/MobileHeader'; // file
             aria-label="Go back"
           >
             ←
-                {tab.count > 0 && (
-                  <span className={`text-xs mt-1 block ${
-                    activeTab === tab.id ? 'text-emerald-100' : 'text-gray-400'
-                  }`}>
-                    {tab.count} order{tab.count !== 1 ? 's' : ''}
-                  </span>
-                )}
-              </button>
-            ))}
-          </div>
-        </div>
+          </button>
+          {tabs.map(tab => (
+            <button
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id)}
+              className={`flex-1 text-center py-2 px-4 rounded-lg font-medium ${
+                activeTab === tab.id
+                  ? 'bg-emerald-600 text-white'
+                  : 'bg-white text-gray-600 hover:bg-gray-50'
+              }`}
+            >
+              {tab.label}
+              {tab.count > 0 && (
+                <span className={`text-xs mt-1 block ${
+                  activeTab === tab.id ? 'text-emerald-100' : 'text-gray-400'
+                }`}>
+                  {tab.count} order{tab.count !== 1 ? 's' : ''}
+                </span>
+              )}
+            </button>
+          ))}
         </div>
 
         {/* Orders List */}
@@ -260,7 +270,7 @@ import MobileHeader from '../components/common/MobileHeader'; // file
         </div>
       </div>
     </div>
-  </>);
+  );
 };
 
 export default OrdersPage;
