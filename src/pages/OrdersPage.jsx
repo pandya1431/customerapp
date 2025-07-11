@@ -210,32 +210,18 @@ const OrdersPage = () => {
                 </div>
 
                 {/* Product Images */}
-                {/* Product Images */}
                 <div className="flex items-center space-x-3 mb-4">
-                  {order.items && order.items.length > 0 ? (
-                    <>
-                      {order.items.slice(0, 3).map((item, index) => (
-                        <img
-                          key={index}
-                          src={item.image}
-                          alt={item.name}
-                          className="w-12 h-12 object-cover rounded-lg border border-gray-200"
-                          onError={(e) => {
-                            e.target.src = 'https://images.pexels.com/photos/264636/pexels-photo-264636.jpeg?auto=compress&cs=tinysrgb&w=100';
-                          }}
-                        />
-                      ))}
-                      {order.items.length > 3 && (
-                        <div className="w-12 h-12 bg-gray-100 rounded-lg border border-gray-200 flex items-center justify-center">
-                          <span className="text-xs text-gray-600">+{order.items.length - 3}</span>
-                        </div>
-                      )}
-                    </>
-                  ) : (
-                    <div className="flex items-center space-x-3">
-                      <div className="w-12 h-12 bg-gray-100 rounded-lg border border-gray-200 flex items-center justify-center">
-                        <Package className="w-6 h-6 text-gray-400" />
-                      </div>
+                  {order.items.slice(0, 3).map((item, index) => (
+                    <img
+                      key={index}
+                      src={item.image}
+                      alt={item.name}
+                      className="w-12 h-12 object-cover rounded-lg border border-gray-200"
+                    />
+                  ))}
+                  {order.items.length > 3 && (
+                    <div className="w-12 h-12 bg-gray-100 rounded-lg border border-gray-200 flex items-center justify-center">
+                      <span className="text-xs text-gray-600">+{order.items.length - 3}</span>
                     </div>
                   )}
                 </div>
