@@ -155,6 +155,8 @@ const OrdersPage = () => {
             aria-label="Go back"
           >
             ←
+          </button>
+        </div>
         {/* Header */}
         <div className="mb-8 hidden md:block">
           <h1 className="text-2xl md:text-3xl font-bold text-gray-900">My Orders</h1>
