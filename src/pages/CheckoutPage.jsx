@@ -155,6 +155,8 @@ const OrdersPage = () => {
             aria-label="Go back"
           >
             ←
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id)}
                 className={`flex-1 min-w-0 px-4 py-4 text-sm font-medium transition-all duration-200 ${
                   activeTab === tab.id
                     ? 'bg-emerald-600 text-white'
@@ -265,7 +267,6 @@ const OrdersPage = () => {
           )}
         </div>
       </div>
-    </div>
     </div>
   );
 };

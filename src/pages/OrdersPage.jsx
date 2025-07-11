@@ -155,19 +155,6 @@ const OrdersPage = () => {
             aria-label="Go back"
           >
             ←
-          </button>
-        </div>
-        {/* Header */}
-        <div className="mb-8 hidden md:block">
-          <h1 className="text-2xl md:text-3xl font-bold text-gray-900">My Orders</h1>
-          <p className="text-gray-600 mt-1">Track and manage your orders</p>
-        </div>
-
-        {/* Tab Filters */}
-        <div className="bg-white rounded-lg shadow-sm border mb-6 overflow-hidden">
-          <div className="flex overflow-x-auto">
-            {tabs.map((tab) => (
-              <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
                 className={`flex-1 min-w-0 px-4 py-4 text-sm font-medium transition-all duration-200 ${

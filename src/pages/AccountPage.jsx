@@ -155,10 +155,6 @@ const OrdersPage = () => {
             aria-label="Go back"
           >
             ←
-          </button>
-          <div className="flex-1 min-w-0 px-4 py-4 text-sm font-medium transition-all duration-200">
-            {tabs.map(tab => (
-              <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
                 className={`flex-1 min-w-0 px-4 py-4 text-sm font-medium transition-all duration-200 ${
@@ -247,25 +243,26 @@ const OrdersPage = () => {
           ) : (
             /* Empty State */
             <div className="text-center py-12">
-              <div className="bg-white shadow-sm mx-4 mt-4 rounded-lg">
-                <div className="p-4">
-                  <div className="flex items-center space-x-4">
-                    <div className="w-16 h-16 bg-emerald-600 rounded-full flex items-center justify-center">
-                      <User className="w-8 h-8 text-white" />
-                    </div>
-                    <div className="flex-1">
-                      <h1 className="text-xl font-semibold text-gray-900">{user?.name || 'John Doe'}</h1>
-                      <p className="text-sm text-gray-600">{user?.email || 'customer@grooso.com'}</p>
-                    </div>
-                    <Link
-                      to="/profile"
-                      className="bg-emerald-600 text-white px-3 py-2 rounded-lg text-sm font-medium hover:bg-emerald-700 transition-colors"
-                    >
-                      <Edit className="w-4 h-4" />
-                    </Link>
-                  </div>
-                </div>
+              <div className="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Package className="w-12 h-12 text-gray-400" />
               </div>
+              <h3 className="text-lg font-medium text-gray-900 mb-2">
+                {activeTab === 'all' ? 'No orders found' : `No ${activeTab} orders`}
+              </h3>
+              <p className="text-gray-500 mb-6">
+                {activeTab === 'all' 
+                  ? "You haven't placed any orders yet" 
+                  : `You don't have any ${activeTab} orders`
+                }
+              </p>
+              {activeTab === 'all' && (
+                <a
+                  href="/"
+                  className="inline-flex items-center space-x-2 bg-emerald-600 text-white px-6 py-3 rounded-lg hover:bg-emerald-700 transition-colors"
+                >
+                  <span>Start Shopping</span>
+                </a>
+              )}
             </div>
           )}
         </div>
