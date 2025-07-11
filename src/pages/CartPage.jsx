@@ -155,19 +155,6 @@ const OrdersPage = () => {
             aria-label="Go back"
           >
             ←
-                {tab.count > 0 && (
-                  <span className={`text-xs mt-1 block ${
-                    activeTab === tab.id ? 'text-emerald-100' : 'text-gray-400'
-                  }`}>
-                    {tab.count} order{tab.count !== 1 ? 's' : ''}
-                  </span>
-                )}
-              </button>
-            ))}
-          </div>
-        </div>
-        </div>
-
         {/* Orders List */}
         <div className="space-y-4">
           {filteredOrders.length > 0 ? (
