@@ -155,19 +155,6 @@ const OrdersPage = () => {
             aria-label="Go back"
           >
             ←
-                    {tab.count} order{tab.count !== 1 ? 's' : ''}
-                  </span>
-                )}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {/* Orders List */}
-        <div className="space-y-4">
-          {filteredOrders.length > 0 ? (
-            filteredOrders.map((order) => (
-              <div key={order.id} className="bg-white rounded-lg shadow-sm border p-6 hover:shadow-md transition-shadow">
                 {/* Order Header */}
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-4">
                   <div className="flex items-center space-x-3 mb-2 sm:mb-0">
